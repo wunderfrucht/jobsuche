@@ -114,10 +114,19 @@
 //! Based on analysis of GitHub issues, be aware of:
 //!
 //! 1. **404 Errors**: Job details may return 404 even if the job appears in search results (jobs expire quickly)
-//! 2. **403 Errors**: Sporadic rate limiting may occur
-//! 3. **Employer Search**: Case-sensitive and exact-match only ("Deutsche Bahn AG" works, "bahn" doesn't)
-//! 4. **Employer Logos**: Many employers don't have logos (expect 404s)
-//! 5. **No Sorting**: Results are sorted oldest-to-newest, no way to change this
+//! 2. **Rate Limiting**: API may return 429 (Too Many Requests) - client automatically retries with exponential backoff
+//! 3. **403 Errors**: Sporadic temporary blocks may occur
+//! 4. **Employer Search**: Case-sensitive and exact-match only ("Deutsche Bahn AG" works, "bahn" doesn't)
+//! 5. **Employer Logos**: Many employers don't have logos (expect 404s)
+//! 6. **No Sorting**: Results are sorted oldest-to-newest, no way to change this
+//!
+//! # Rate Limiting
+//!
+//! The client handles rate limiting automatically:
+//! - Detects 429 (Too Many Requests) responses
+//! - Respects `Retry-After` header when present
+//! - Falls back to exponential backoff if no `Retry-After` header
+//! - Configurable retry attempts (default: 3)
 //!
 //! # Features
 //!

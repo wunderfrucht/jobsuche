@@ -320,10 +320,9 @@ impl Jobsuche {
                     let should_retry = matches!(
                         e,
                         Error::Http(_)
+                            | Error::RateLimited { .. }
                             | Error::Fault {
-                                code: StatusCode::TOO_MANY_REQUESTS
-                                    | StatusCode::SERVICE_UNAVAILABLE
-                                    | StatusCode::GATEWAY_TIMEOUT,
+                                code: StatusCode::SERVICE_UNAVAILABLE | StatusCode::GATEWAY_TIMEOUT,
                                 ..
                             }
                     );
@@ -332,7 +331,18 @@ impl Jobsuche {
                         return Err(e);
                     }
 
-                    if let Some(duration) = backoff_strategy.next_backoff() {
+                    // Handle rate limiting with Retry-After
+                    if let Error::RateLimited {
+                        retry_after: Some(seconds),
+                    } = e
+                    {
+                        let duration = Duration::from_secs(seconds);
+                        warn!(
+                            "Rate limited, waiting {} seconds as requested by server (attempt {}/{})",
+                            seconds, attempt, self.config.max_retries
+                        );
+                        thread::sleep(duration);
+                    } else if let Some(duration) = backoff_strategy.next_backoff() {
                         warn!(
                             "Request failed ({}), retrying in {:?}... (attempt {}/{})",
                             e, duration, attempt, self.config.max_retries
@@ -387,6 +397,23 @@ impl Jobsuche {
             StatusCode::FORBIDDEN => Error::Forbidden,
             StatusCode::NOT_FOUND => Error::NotFound,
             StatusCode::METHOD_NOT_ALLOWED => Error::MethodNotAllowed,
+            StatusCode::TOO_MANY_REQUESTS => {
+                // Parse Retry-After header if present
+                let retry_after = response
+                    .headers()
+                    .get("Retry-After")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| {
+                        // Try parsing as seconds (numeric)
+                        s.parse::<u64>().ok().or_else(|| {
+                            // Try parsing as HTTP-date (not implemented for simplicity)
+                            // In production, would parse RFC 2822/RFC 3339 dates
+                            None
+                        })
+                    });
+
+                Error::RateLimited { retry_after }
+            }
             _ => {
                 // Try to parse error response
                 let mut body = String::new();
