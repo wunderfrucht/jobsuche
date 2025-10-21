@@ -9,6 +9,11 @@ use crate::{JobSearchResponse, Result, SearchOptions};
 #[cfg(feature = "async")]
 use crate::async_client::JobsucheAsync;
 
+#[cfg(feature = "async")]
+use async_stream::stream;
+#[cfg(feature = "async")]
+use futures::stream::Stream;
+
 /// Search interface for finding jobs
 ///
 /// This interface provides methods to search for jobs using the Jobsuche API.
@@ -275,6 +280,139 @@ impl SearchAsync {
 
         Ok(all_jobs)
     }
+
+    /// Return a lazy stream over job search results
+    ///
+    /// This method returns a `Stream` that yields jobs one at a time,
+    /// fetching pages on-demand. This is the most memory-efficient way
+    /// to process large result sets.
+    ///
+    /// # Memory Usage
+    ///
+    /// - **Constant O(1) memory** - only current page in memory
+    /// - Can process unlimited results without loading all at once
+    /// - Can stop early without fetching remaining pages
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use jobsuche::{JobsucheAsync, Credentials, SearchOptions};
+    /// use futures::StreamExt;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let client = JobsucheAsync::new(
+    ///         "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+    ///         Credentials::default()
+    ///     ).await?;
+    ///
+    ///     let options = SearchOptions::builder()
+    ///         .was("Rust Developer")
+    ///         .wo("Deutschland")
+    ///         .build();
+    ///
+    ///     // Stream processes jobs one at a time - constant memory!
+    ///     let mut stream = client.search().stream(options);
+    ///
+    ///     while let Some(result) = stream.next().await {
+    ///         match result {
+    ///             Ok(job) => println!("Found: {}", job.beruf),
+    ///             Err(e) => eprintln!("Error: {}", e),
+    ///         }
+    ///     }
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// # Advanced Usage
+    ///
+    /// Streams compose naturally with futures combinators:
+    ///
+    /// ```no_run
+    /// use jobsuche::{JobsucheAsync, Credentials, SearchOptions};
+    /// use futures::StreamExt;
+    ///
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// # let client = JobsucheAsync::new(
+    /// #     "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+    /// #     Credentials::default()
+    /// # ).await?;
+    /// # let options = SearchOptions::builder().was("Developer").build();
+    /// let stream = client.search().stream(options)
+    ///     .filter(|result| {
+    ///         // Filter senior positions
+    ///         futures::future::ready(
+    ///             matches!(result, Ok(job) if job.beruf.contains("Senior"))
+    ///         )
+    ///     })
+    ///     .take(50); // Only take first 50 matches
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn stream(
+        &self,
+        options: SearchOptions,
+    ) -> std::pin::Pin<Box<dyn Stream<Item = Result<crate::JobListing>> + Send>> {
+        let client = self.client.clone();
+
+        Box::pin(stream! {
+            let mut page = 1u64;
+            let size = options.size().unwrap_or(50);
+            let mut total_yielded = 0u64;
+            let mut max_results: Option<u64> = None;
+
+            loop {
+                // Build options for this page
+                let page_options = options.as_builder().page(page).size(size).build();
+
+                debug!("Fetching page {} (async stream)", page);
+
+                // Fetch the page
+                match client.search().list(page_options).await {
+                    Ok(response) => {
+                        // Store max_results from first page
+                        if page == 1 {
+                            max_results = response.max_ergebnisse;
+                        }
+
+                        let jobs_count = response.stellenangebote.len();
+
+                        // Yield each job individually
+                        for job in response.stellenangebote {
+                            yield Ok(job);
+                            total_yielded += 1;
+
+                            // Check if we've hit max_results
+                            if let Some(max) = max_results {
+                                if total_yielded >= max {
+                                    return;
+                                }
+                            }
+                        }
+
+                        // Stop if this was a partial page (last page)
+                        if jobs_count < size as usize {
+                            return;
+                        }
+
+                        page += 1;
+
+                        // Safety limit
+                        if page > 1000 {
+                            debug!("Reached safety limit of 1000 pages");
+                            return;
+                        }
+                    }
+                    Err(e) => {
+                        // Yield error and stop
+                        yield Err(e);
+                        return;
+                    }
+                }
+            }
+        })
+    }
 }
 
 #[cfg(all(test, feature = "async"))]
@@ -293,5 +431,26 @@ mod async_tests {
 
         let search = client.search();
         assert!(format!("{:?}", search).contains("SearchAsync"));
+    }
+
+    #[tokio::test]
+    async fn test_stream_creation() {
+        use futures::StreamExt;
+
+        let client = JobsucheAsync::new(
+            "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+            Credentials::default(),
+        )
+        .await
+        .unwrap();
+
+        let options = SearchOptions::builder().was("test").build();
+
+        // Just verify stream can be created (don't actually fetch)
+        let stream = client.search().stream(options);
+
+        // Verify stream type by taking 0 items
+        let results: Vec<_> = stream.take(0).collect().await;
+        assert_eq!(results.len(), 0);
     }
 }
