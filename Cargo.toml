@@ -1,0 +1,48 @@
+[package]
+name = "jobsuche"
+version = "0.1.0"
+authors = ["wunderfrucht"]
+description = "Rust interface for the Bundesagentur für Arbeit Jobsuche API"
+documentation = "https://docs.rs/jobsuche"
+homepage = "https://github.com/wunderfrucht/jobsuche"
+repository = "https://github.com/wunderfrucht/jobsuche"
+keywords = ["jobs", "arbeitsagentur", "api", "germany"]
+license = "MIT"
+readme = "README.md"
+edition = "2021"
+rust-version = "1.70.0"
+
+[dependencies]
+tracing = "0.1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "blocking",
+    "rustls-tls",
+    "json",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"
+time = { version = "0.3", features = ['serde-well-known', 'macros'] }
+thiserror = "2.0"
+tokio = { version = "1", features = ["rt", "time", "macros", "rt-multi-thread"], optional = true }
+futures = { version = "0.3", optional = true }
+base64 = "0.22"
+parking_lot = { version = "0.12", optional = true }
+once_cell = { version = "1.19", optional = true }
+
+[dev-dependencies]
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tokio = { version = "1", features = ["rt", "time", "macros", "test-util", "rt-multi-thread"] }
+mockito = "1.7"
+
+[features]
+default = []
+async = ["tokio", "futures"]
+cache = ["parking_lot", "once_cell"]
+metrics = ["parking_lot", "once_cell"]
+observability = ["metrics", "cache"]
+full = ["async", "observability"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

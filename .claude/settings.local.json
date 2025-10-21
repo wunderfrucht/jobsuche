@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__fetch__imageFetch",
+      "Bash(gh issue list --repo bundesAPI/jobsuche-api --limit 100 --state all --json number,title,state,body,createdAt,updatedAt,url)",
+      "Bash(gh pr list --repo bundesAPI/jobsuche-api --limit 100 --state all --json number,title,state,body,createdAt,updatedAt,url)",
+      "Bash(curl -s https://raw.githubusercontent.com/bundesAPI/jobsuche-api/main/openapi.yaml)",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "Read(//tmp/**)",
+      "Bash(gh repo view wunderfrucht/gouji --json description,url,languages,readme)",
+      "Bash(gh api repos/wunderfrucht/gouji/contents)",
+      "Bash(gh repo view wunderfrucht/gouji --json description,url,languages,name)",
+      "Bash(gh repo list wunderfrucht --limit 50 --json name,description,url,primaryLanguage)",
+      "Bash(gh repo clone wunderfrucht/gouqi /tmp/gouqi)",
+      "Bash(mkdir -p /Users/r/git/jobsuche/src)",
+      "Bash(cargo check)",
+      "Bash(cargo test)",
+      "Bash(find /Users/r/git/jobsuche/src -name \"*.rs\" -exec wc -l {} +)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
