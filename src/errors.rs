@@ -1,6 +1,9 @@
 use reqwest::StatusCode;
 use thiserror::Error;
 
+#[cfg(feature = "async")]
+use reqwest_middleware::Error as MiddlewareError;
+
 /// An enumeration over potential errors that may happen when sending a request to the Jobsuche API
 #[derive(Error, Debug)]
 pub enum Error {
@@ -51,6 +54,11 @@ pub enum Error {
     /// Base64 encoding/decoding error
     #[error("Base64 error: {0}")]
     Base64Error(#[from] base64::DecodeError),
+
+    /// Async HTTP middleware error
+    #[cfg(feature = "async")]
+    #[error("HTTP middleware error: {0}")]
+    Middleware(#[from] MiddlewareError),
 }
 
 /// API error response structure

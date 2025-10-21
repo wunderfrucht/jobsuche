@@ -9,9 +9,11 @@
 //! - 🔍 **Job Search**: Search for jobs with rich filtering options (location, job title, employment type, etc.)
 //! - 📄 **Job Details**: Get comprehensive information about specific job postings
 //! - 🏢 **Employer Logos**: Download employer logos when available
-//! - 🔄 **Pagination**: Automatic pagination support for large result sets
+//! - 🔄 **Pagination**: Automatic pagination support for large result sets (with lazy iteration)
 //! - 🦀 **Type-Safe**: Strongly typed API with enums for all parameters
-//! - ⚡ **Sync & Async**: Both synchronous and asynchronous clients (async with feature flag)
+//! - ⚡ **Sync & Async**: Both synchronous and asynchronous clients (async with `async` feature flag)
+//! - 🔁 **Retry Logic**: Automatic retry with exponential backoff for transient failures
+//! - ⏱️ **Timeouts**: Configurable request and connection timeouts (default: 30s/10s)
 //!
 //! # Quick Start
 //!
@@ -132,6 +134,9 @@ pub mod rep;
 pub mod search;
 pub mod sync;
 
+#[cfg(feature = "async")]
+pub mod async_client;
+
 // Re-export main types for convenience
 pub use builder::{SearchOptions, SearchOptionsBuilder};
 pub use core::{decode_refnr, encode_refnr, ClientCore, Credentials};
@@ -142,6 +147,11 @@ pub use rep::{
 };
 pub use search::Search;
 pub use sync::{ClientConfig, Jobsuche};
+
+#[cfg(feature = "async")]
+pub use async_client::JobsucheAsync;
+#[cfg(feature = "async")]
+pub use search::SearchAsync;
 
 // Re-export tracing for users who want logging
 pub use tracing;

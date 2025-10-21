@@ -6,6 +6,9 @@ use crate::pagination::JobIterator;
 use crate::sync::Jobsuche;
 use crate::{JobSearchResponse, Result, SearchOptions};
 
+#[cfg(feature = "async")]
+use crate::async_client::JobsucheAsync;
+
 /// Search interface for finding jobs
 ///
 /// This interface provides methods to search for jobs using the Jobsuche API.
@@ -151,5 +154,144 @@ mod tests {
 
         let search = client.search();
         assert!(format!("{:?}", search).contains("Search"));
+    }
+}
+
+/// Async search interface for finding jobs
+///
+/// This interface provides async methods to search for jobs using the Jobsuche API.
+#[cfg(feature = "async")]
+#[derive(Debug)]
+pub struct SearchAsync {
+    client: JobsucheAsync,
+}
+
+#[cfg(feature = "async")]
+impl SearchAsync {
+    pub(crate) fn new(client: &JobsucheAsync) -> SearchAsync {
+        SearchAsync {
+            client: client.clone(),
+        }
+    }
+
+    /// Perform an async job search with the given options
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use jobsuche::{JobsucheAsync, Credentials, SearchOptions, Arbeitszeit};
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let client = JobsucheAsync::new(
+    ///         "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+    ///         Credentials::default()
+    ///     ).await?;
+    ///
+    ///     let results = client.search().list(SearchOptions::builder()
+    ///         .was("Softwareentwickler")
+    ///         .wo("Berlin")
+    ///         .size(25)
+    ///         .build()
+    ///     ).await?;
+    ///
+    ///     println!("Found {} jobs", results.stellenangebote.len());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub async fn list(&self, options: SearchOptions) -> Result<JobSearchResponse> {
+        let mut path = self.client.core.path(&["pc", "v4", "jobs"]);
+
+        if let Some(query) = options.serialize() {
+            path.push('?');
+            path.push_str(&query);
+        }
+
+        debug!("Searching jobs with path: {} (async)", path);
+
+        self.client.get(&path).await
+    }
+
+    /// Search with automatic pagination, yielding all results (async)
+    ///
+    /// This method collects all pages into a Vec. For large result sets,
+    /// this can use significant memory.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use jobsuche::{JobsucheAsync, Credentials, SearchOptions};
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let client = JobsucheAsync::new(
+    ///         "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+    ///         Credentials::default()
+    ///     ).await?;
+    ///
+    ///     let all_jobs = client.search().iter(SearchOptions::builder()
+    ///         .was("Rust Developer")
+    ///         .veroeffentlichtseit(7)
+    ///         .build()
+    ///     ).await?;
+    ///
+    ///     println!("Found {} total jobs", all_jobs.len());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub async fn iter(&self, options: SearchOptions) -> Result<Vec<crate::JobListing>> {
+        let mut all_jobs = Vec::new();
+        let mut page = 1u64;
+        let size = options.size().unwrap_or(50);
+
+        loop {
+            let page_options = options.as_builder().page(page).size(size).build();
+
+            let results = self.list(page_options).await?;
+
+            let jobs_count = results.stellenangebote.len();
+            all_jobs.extend(results.stellenangebote);
+
+            // Stop if we got fewer results than requested (last page)
+            if jobs_count < size as usize {
+                break;
+            }
+
+            // Check if we've reached the maximum results
+            if let Some(max) = results.max_ergebnisse {
+                if all_jobs.len() >= max as usize {
+                    break;
+                }
+            }
+
+            page += 1;
+
+            // Safety limit to prevent infinite loops
+            if page > 1000 {
+                debug!("Reached safety limit of 1000 pages");
+                break;
+            }
+        }
+
+        Ok(all_jobs)
+    }
+}
+
+#[cfg(all(test, feature = "async"))]
+mod async_tests {
+    use super::*;
+    use crate::Credentials;
+
+    #[tokio::test]
+    async fn test_async_search_creation() {
+        let client = JobsucheAsync::new(
+            "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+            Credentials::default(),
+        )
+        .await
+        .unwrap();
+
+        let search = client.search();
+        assert!(format!("{:?}", search).contains("SearchAsync"));
     }
 }
