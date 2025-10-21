@@ -3,8 +3,9 @@
 //! These tests use mockito to simulate API responses without making real HTTP calls.
 //! They run quickly and don't require network access.
 
-use jobsuche::{Arbeitszeit, Credentials, Jobsuche, SearchOptions};
+use jobsuche::{Arbeitszeit, ClientConfig, Credentials, Jobsuche, SearchOptions};
 use mockito::Server;
+use std::time::{Duration, Instant};
 
 #[test]
 fn test_search_with_mock() {
@@ -344,4 +345,79 @@ fn test_retry_disabled() {
     // Just verify the client was created with retry disabled
     // (actual retry behavior is tested in integration tests)
     assert!(format!("{:?}", client).contains("ClientConfig"));
+}
+
+#[test]
+fn test_rate_limit_429_detection() {
+    let mut server = Server::new();
+
+    // Return 429 with Retry-After header
+    let _m = server
+        .mock("GET", "/pc/v4/jobs")
+        .with_status(429)
+        .with_header("Retry-After", "60")
+        .create();
+
+    let config = ClientConfig {
+        max_retries: 0, // Don't retry, just check error detection
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = Jobsuche::with_config(server.url(), Credentials::default(), config).unwrap();
+
+    let result = client.search().list(SearchOptions::default());
+
+    // Should detect rate limit error with Retry-After
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        jobsuche::Error::RateLimited { retry_after } => {
+            assert_eq!(retry_after, Some(60), "Should parse Retry-After header");
+        }
+        other => panic!("Expected RateLimited error, got: {:?}", other),
+    }
+}
+
+#[test]
+fn test_rate_limit_429_without_retry_after() {
+    let mut server = Server::new();
+
+    // Return 429 without Retry-After header
+    let _m = server.mock("GET", "/pc/v4/jobs").with_status(429).create();
+
+    let config = ClientConfig {
+        max_retries: 0, // Don't retry, just check error detection
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = Jobsuche::with_config(server.url(), Credentials::default(), config).unwrap();
+
+    let result = client.search().list(SearchOptions::default());
+
+    // Should detect rate limit error without Retry-After
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        jobsuche::Error::RateLimited { retry_after } => {
+            assert_eq!(retry_after, None, "Should have no Retry-After header");
+        }
+        other => panic!("Expected RateLimited error, got: {:?}", other),
+    }
+}
+
+#[test]
+fn test_rate_limit_error_display() {
+    use jobsuche::Error;
+
+    let error = Error::RateLimited {
+        retry_after: Some(60),
+    };
+
+    let display = format!("{}", error);
+    assert!(display.contains("Rate limited"));
+    assert!(display.contains("60"));
+
+    let error_no_retry = Error::RateLimited { retry_after: None };
+    let display_no_retry = format!("{}", error_no_retry);
+    assert!(display_no_retry.contains("Rate limited"));
 }

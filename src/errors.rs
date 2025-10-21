@@ -31,6 +31,13 @@ pub enum Error {
     #[error("Jobsuche API request blocked: Forbidden (possible rate limiting)")]
     Forbidden,
 
+    /// Rate limited - too many requests
+    #[error("Rate limited by API. Retry after: {retry_after:?} seconds")]
+    RateLimited {
+        /// Number of seconds to wait before retrying (from Retry-After header)
+        retry_after: Option<u64>,
+    },
+
     /// Resource not found (common for job details that have expired)
     #[error("Resource not found (job may have expired or been removed)")]
     NotFound,
