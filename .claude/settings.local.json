@@ -7,7 +7,8 @@
       "Bash(cargo build --features async)",
       "Bash(cargo test --features async)",
       "Bash(cargo test --all-features)",
-      "Bash(cargo clippy --all-features --all-targets)"
+      "Bash(cargo clippy --all-features --all-targets)",
+      "Bash(cargo test --features async --test async_stream_tests)"
     ],
     "deny": [],
     "ask": []
