@@ -271,9 +271,9 @@ impl SearchAsync {
 
             page += 1;
 
-            // Safety limit to prevent infinite loops
-            if page > 1000 {
-                debug!("Reached safety limit of 1000 pages");
+            // API limit: maximum 100 pages total (Issue #14 in bundesAPI/jobsuche-api)
+            if page > 100 {
+                debug!("Reached API limit: maximum 100 pages");
                 break;
             }
         }
@@ -398,9 +398,9 @@ impl SearchAsync {
 
                         page += 1;
 
-                        // Safety limit
-                        if page > 1000 {
-                            debug!("Reached safety limit of 1000 pages");
+                        // API limit: maximum 100 pages total (Issue #14 in bundesAPI/jobsuche-api)
+                        if page > 100 {
+                            debug!("Reached API limit: maximum 100 pages");
                             return;
                         }
                     }

@@ -75,9 +75,9 @@ impl JobIterator {
 
         self.current_page += 1;
 
-        // Safety limit
-        if self.current_page > 1000 {
-            debug!("Reached safety limit of 1000 pages");
+        // API limit: maximum 100 pages total (Issue #14 in bundesAPI/jobsuche-api)
+        if self.current_page > 100 {
+            debug!("Reached API limit: maximum 100 pages");
             self.finished = true;
             return Ok(false);
         }

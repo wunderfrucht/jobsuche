@@ -162,6 +162,9 @@ impl SearchOptionsBuilder {
 
     /// Filter by days since publication (0-100 days)
     ///
+    /// ⚠️ **Known Issue**: This parameter may not work correctly due to an API bug.
+    /// The API may ignore this filter. See [Issue #34](https://github.com/bundesAPI/jobsuche-api/issues/34)
+    ///
     /// # Example
     /// ```
     /// use jobsuche::SearchOptions;
