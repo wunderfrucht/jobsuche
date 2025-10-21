@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 use tracing::{debug, warn};
 
-use backoff::{backoff::Backoff, ExponentialBackoff};
+use backon::{BackoffBuilder, ExponentialBuilder};
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::{Method, StatusCode};
@@ -298,12 +298,14 @@ impl Jobsuche {
             return self.get_once(path);
         }
 
-        let mut backoff_strategy = ExponentialBackoff {
-            max_elapsed_time: Some(Duration::from_secs(60)),
-            ..ExponentialBackoff::default()
-        };
+        // Build exponential backoff strategy
+        let backoff = ExponentialBuilder::default()
+            .with_max_times(self.config.max_retries as usize)
+            .with_max_delay(Duration::from_secs(60));
 
         let mut attempt = 0;
+        let mut backoff_iter = backoff.build();
+
         loop {
             attempt += 1;
             debug!(
@@ -342,7 +344,7 @@ impl Jobsuche {
                             seconds, attempt, self.config.max_retries
                         );
                         thread::sleep(duration);
-                    } else if let Some(duration) = backoff_strategy.next_backoff() {
+                    } else if let Some(duration) = backoff_iter.next() {
                         warn!(
                             "Request failed ({}), retrying in {:?}... (attempt {}/{})",
                             e, duration, attempt, self.config.max_retries
@@ -404,12 +406,20 @@ impl Jobsuche {
                     .get("Retry-After")
                     .and_then(|v| v.to_str().ok())
                     .and_then(|s| {
-                        // Try parsing as seconds (numeric)
-                        s.parse::<u64>().ok().or_else(|| {
-                            // Try parsing as HTTP-date (not implemented for simplicity)
-                            // In production, would parse RFC 2822/RFC 3339 dates
-                            None
-                        })
+                        // Try parsing as delay-seconds (numeric)
+                        if let Ok(seconds) = s.parse::<u64>() {
+                            return Some(seconds);
+                        }
+
+                        // Try parsing as HTTP-date
+                        if let Ok(date) = httpdate::parse_http_date(s) {
+                            if let Ok(duration) = date.duration_since(std::time::SystemTime::now())
+                            {
+                                return Some(duration.as_secs());
+                            }
+                        }
+
+                        None
                     });
 
                 Error::RateLimited { retry_after }
