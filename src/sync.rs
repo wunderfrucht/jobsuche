@@ -1,8 +1,11 @@
 //! Synchronous client for the Jobsuche API
 
 use std::io::Read;
-use tracing::debug;
+use std::thread;
+use std::time::Duration;
+use tracing::{debug, warn};
 
+use backoff::{backoff::Backoff, ExponentialBackoff};
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::{Method, StatusCode};
@@ -11,6 +14,30 @@ use serde::de::DeserializeOwned;
 use crate::core::{encode_refnr, ClientCore};
 use crate::search::Search;
 use crate::{ApiErrors, Credentials, Error, JobDetails, Result};
+
+/// Configuration for the Jobsuche client
+#[derive(Clone, Debug)]
+pub struct ClientConfig {
+    /// Request timeout (default: 30 seconds)
+    pub timeout: Duration,
+    /// Connection timeout (default: 10 seconds)
+    pub connect_timeout: Duration,
+    /// Maximum number of retry attempts (default: 3)
+    pub max_retries: u32,
+    /// Enable retry logic for transient errors (default: true)
+    pub retry_enabled: bool,
+}
+
+impl Default for ClientConfig {
+    fn default() -> Self {
+        Self {
+            timeout: Duration::from_secs(30),
+            connect_timeout: Duration::from_secs(10),
+            max_retries: 3,
+            retry_enabled: true,
+        }
+    }
+}
 
 /// Synchronous Jobsuche API client
 ///
@@ -42,10 +69,11 @@ use crate::{ApiErrors, Credentials, Error, JobDetails, Result};
 pub struct Jobsuche {
     pub(crate) core: ClientCore,
     client: Client,
+    config: ClientConfig,
 }
 
 impl Jobsuche {
-    /// Creates a new instance of the Jobsuche client
+    /// Creates a new instance of the Jobsuche client with default configuration
     ///
     /// # Arguments
     ///
@@ -66,22 +94,59 @@ impl Jobsuche {
     where
         H: Into<String>,
     {
+        Self::with_config(host, credentials, ClientConfig::default())
+    }
+
+    /// Creates a new instance with custom configuration
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use jobsuche::{Jobsuche, Credentials, ClientConfig};
+    /// use std::time::Duration;
+    ///
+    /// let config = ClientConfig {
+    ///     timeout: Duration::from_secs(60),
+    ///     max_retries: 5,
+    ///     ..Default::default()
+    /// };
+    ///
+    /// let client = Jobsuche::with_config(
+    ///     "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+    ///     Credentials::default(),
+    ///     config
+    /// ).unwrap();
+    /// ```
+    pub fn with_config<H>(
+        host: H,
+        credentials: Credentials,
+        config: ClientConfig,
+    ) -> Result<Jobsuche>
+    where
+        H: Into<String>,
+    {
         let core = ClientCore::new(host, credentials)?;
+        let client = Client::builder()
+            .timeout(config.timeout)
+            .connect_timeout(config.connect_timeout)
+            .build()?;
+
         Ok(Jobsuche {
             core,
-            client: Client::new(),
+            client,
+            config,
         })
     }
 
     /// Creates a new instance using a custom reqwest client
     ///
     /// This is useful if you need to configure custom timeouts, proxies, or other
-    /// HTTP client settings.
+    /// HTTP client settings. Note: if using a custom client, timeout config will be ignored.
     ///
     /// # Example
     ///
     /// ```no_run
-    /// use jobsuche::{Jobsuche, Credentials};
+    /// use jobsuche::{Jobsuche, Credentials, ClientConfig};
     /// use reqwest::blocking::Client;
     /// use std::time::Duration;
     ///
@@ -93,24 +158,45 @@ impl Jobsuche {
     /// let jobsuche = Jobsuche::from_client(
     ///     "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
     ///     Credentials::default(),
-    ///     client
+    ///     client,
+    ///     ClientConfig::default()
     /// ).unwrap();
     /// ```
-    pub fn from_client<H>(host: H, credentials: Credentials, client: Client) -> Result<Jobsuche>
+    pub fn from_client<H>(
+        host: H,
+        credentials: Credentials,
+        client: Client,
+        config: ClientConfig,
+    ) -> Result<Jobsuche>
     where
         H: Into<String>,
     {
         let core = ClientCore::new(host, credentials)?;
-        Ok(Jobsuche { core, client })
+        Ok(Jobsuche {
+            core,
+            client,
+            config,
+        })
     }
 
     /// Creates a client instance directly from an existing ClientCore
     ///
     /// This is useful for converting between sync and async clients.
     pub fn with_core(core: ClientCore) -> Result<Jobsuche> {
+        Self::with_config_and_core(core, ClientConfig::default())
+    }
+
+    /// Creates a client instance from an existing ClientCore with custom config
+    pub fn with_config_and_core(core: ClientCore, config: ClientConfig) -> Result<Jobsuche> {
+        let client = Client::builder()
+            .timeout(config.timeout)
+            .connect_timeout(config.connect_timeout)
+            .build()?;
+
         Ok(Jobsuche {
             core,
-            client: Client::new(),
+            client,
+            config,
         })
     }
 
@@ -203,8 +289,65 @@ impl Jobsuche {
         Ok(bytes)
     }
 
-    /// Internal method to perform GET requests
+    /// Internal method to perform GET requests with retry logic
     pub(crate) fn get<T>(&self, path: &str) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        if !self.config.retry_enabled {
+            return self.get_once(path);
+        }
+
+        let mut backoff_strategy = ExponentialBackoff {
+            max_elapsed_time: Some(Duration::from_secs(60)),
+            ..ExponentialBackoff::default()
+        };
+
+        let mut attempt = 0;
+        loop {
+            attempt += 1;
+            debug!(
+                "GET {} (attempt {}/{})",
+                path,
+                attempt,
+                self.config.max_retries + 1
+            );
+
+            match self.get_once(path) {
+                Ok(result) => return Ok(result),
+                Err(e) => {
+                    // Check if error is retryable
+                    let should_retry = matches!(
+                        e,
+                        Error::Http(_)
+                            | Error::Fault {
+                                code: StatusCode::TOO_MANY_REQUESTS
+                                    | StatusCode::SERVICE_UNAVAILABLE
+                                    | StatusCode::GATEWAY_TIMEOUT,
+                                ..
+                            }
+                    );
+
+                    if !should_retry || attempt > self.config.max_retries {
+                        return Err(e);
+                    }
+
+                    if let Some(duration) = backoff_strategy.next_backoff() {
+                        warn!(
+                            "Request failed ({}), retrying in {:?}... (attempt {}/{})",
+                            e, duration, attempt, self.config.max_retries
+                        );
+                        thread::sleep(duration);
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Perform a single GET request without retry
+    fn get_once<T>(&self, path: &str) -> Result<T>
     where
         T: DeserializeOwned,
     {
@@ -215,8 +358,6 @@ impl Jobsuche {
         );
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
-
-        debug!("GET {}", path);
 
         let response = self
             .client

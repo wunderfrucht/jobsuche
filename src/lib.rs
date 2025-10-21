@@ -127,6 +127,7 @@
 pub mod builder;
 pub mod core;
 mod errors;
+pub mod pagination;
 pub mod rep;
 pub mod search;
 pub mod sync;
@@ -140,7 +141,7 @@ pub use rep::{
     JobListing, JobSearchResponse, LeadershipSkills, Mobility, Skill, WorkLocation,
 };
 pub use search::Search;
-pub use sync::Jobsuche;
+pub use sync::{ClientConfig, Jobsuche};
 
 // Re-export tracing for users who want logging
 pub use tracing;

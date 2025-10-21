@@ -2,6 +2,7 @@
 
 use tracing::debug;
 
+use crate::pagination::JobIterator;
 use crate::sync::Jobsuche;
 use crate::{JobSearchResponse, Result, SearchOptions};
 
@@ -64,16 +65,20 @@ impl Search {
         self.client.get(&path)
     }
 
-    /// Search with automatic pagination, yielding all results
+    /// Search with automatic pagination, yielding all results (collected into Vec)
     ///
     /// This method automatically handles pagination by making multiple requests
-    /// to retrieve all matching jobs. Use with caution for broad searches.
+    /// to retrieve all matching jobs and collecting them into a Vec.
+    ///
+    /// **Warning**: This loads all results into memory! For large result sets,
+    /// consider using `jobs()` which returns a lazy iterator instead.
     ///
     /// # Note
     ///
     /// - The API has a maximum result limit (typically around 100 per page)
     /// - Some searches may return thousands of results
     /// - Consider using filters to narrow down results
+    /// - For memory efficiency, use `jobs()` instead
     ///
     /// # Example
     ///
@@ -95,40 +100,40 @@ impl Search {
     /// println!("Found {} total jobs", all_jobs.len());
     /// ```
     pub fn iter(&self, options: SearchOptions) -> Result<Vec<crate::JobListing>> {
-        let mut all_jobs = Vec::new();
-        let mut page = 1u64;
-        let size = options.size().unwrap_or(50);
+        self.jobs(options)?.collect()
+    }
 
-        loop {
-            let page_options = options.as_builder().page(page).size(size).build();
-
-            let results = self.list(page_options)?;
-
-            let jobs_count = results.stellenangebote.len();
-            all_jobs.extend(results.stellenangebote);
-
-            // Stop if we got fewer results than requested (last page)
-            if jobs_count < size as usize {
-                break;
-            }
-
-            // Check if we've reached the maximum results
-            if let Some(max) = results.max_ergebnisse {
-                if all_jobs.len() >= max as usize {
-                    break;
-                }
-            }
-
-            page += 1;
-
-            // Safety limit to prevent infinite loops
-            if page > 1000 {
-                debug!("Reached safety limit of 1000 pages");
-                break;
-            }
-        }
-
-        Ok(all_jobs)
+    /// Return a lazy iterator over job search results
+    ///
+    /// This method returns an iterator that fetches results page-by-page,
+    /// yielding individual jobs without loading all results into memory.
+    /// This is more memory-efficient than `iter()` for large result sets.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use jobsuche::{Jobsuche, Credentials, SearchOptions};
+    ///
+    /// let client = Jobsuche::new(
+    ///     "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+    ///     Credentials::default()
+    /// ).unwrap();
+    ///
+    /// let options = SearchOptions::builder()
+    ///     .was("Rust Developer")
+    ///     .wo("Deutschland")
+    ///     .build();
+    ///
+    /// // Process jobs one at a time - constant memory usage!
+    /// for job in client.search().jobs(options).unwrap() {
+    ///     match job {
+    ///         Ok(job) => println!("Found: {}", job.beruf),
+    ///         Err(e) => eprintln!("Error: {}", e),
+    ///     }
+    /// }
+    /// ```
+    pub fn jobs(&self, options: SearchOptions) -> Result<JobIterator> {
+        JobIterator::new(&self.client, options)
     }
 }
 
