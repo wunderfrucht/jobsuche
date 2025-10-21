@@ -1,6 +1,6 @@
 [package]
 name = "jobsuche"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["wunderfrucht"]
 description = "Rust interface for the Bundesagentur für Arbeit Jobsuche API"
 documentation = "https://docs.rs/jobsuche"
@@ -29,6 +29,8 @@ futures = { version = "0.3", optional = true }
 base64 = "0.22"
 parking_lot = { version = "0.12", optional = true }
 once_cell = { version = "1.19", optional = true }
+# For retry logic with exponential backoff
+backoff = "0.4"
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
