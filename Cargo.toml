@@ -29,8 +29,11 @@ futures = { version = "0.3", optional = true }
 base64 = "0.22"
 parking_lot = { version = "0.12", optional = true }
 once_cell = { version = "1.19", optional = true }
-# For retry logic with exponential backoff
+# For retry logic with exponential backoff (sync)
 backoff = "0.4"
+# For async retry middleware
+reqwest-middleware = { version = "0.4", optional = true }
+reqwest-retry = { version = "0.7", optional = true }
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -39,7 +42,7 @@ mockito = "1.7"
 
 [features]
 default = []
-async = ["tokio", "futures"]
+async = ["tokio", "futures", "reqwest-middleware", "reqwest-retry"]
 cache = ["parking_lot", "once_cell"]
 metrics = ["parking_lot", "once_cell"]
 observability = ["metrics", "cache"]
