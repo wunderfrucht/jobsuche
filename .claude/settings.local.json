@@ -11,7 +11,10 @@
       "Bash(cargo test --features async --test async_stream_tests)",
       "Bash(cargo test --test mock_tests test_rate_limit)",
       "Bash(cargo llvm-cov:*)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(gh pr list:*)",
+      "Bash(gh issue view:*)"
     ],
     "deny": [],
     "ask": []
