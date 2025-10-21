@@ -27,10 +27,11 @@ thiserror = "2.0"
 tokio = { version = "1", features = ["rt", "time", "macros", "rt-multi-thread"], optional = true }
 futures = { version = "0.3", optional = true }
 base64 = "0.22"
+httpdate = "1.0"
 parking_lot = { version = "0.12", optional = true }
 once_cell = { version = "1.19", optional = true }
 # For retry logic with exponential backoff (sync)
-backoff = "0.4"
+backon = "1.3"
 # For async retry middleware
 reqwest-middleware = { version = "0.4", optional = true }
 reqwest-retry = { version = "0.7", optional = true }

@@ -5,7 +5,7 @@
 
 use jobsuche::{Arbeitszeit, ClientConfig, Credentials, Jobsuche, SearchOptions};
 use mockito::Server;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 #[test]
 fn test_search_with_mock() {
@@ -420,4 +420,259 @@ fn test_rate_limit_error_display() {
     let error_no_retry = Error::RateLimited { retry_after: None };
     let display_no_retry = format!("{}", error_no_retry);
     assert!(display_no_retry.contains("Rate limited"));
+}
+
+#[test]
+fn test_from_client() {
+    use reqwest::blocking::Client;
+
+    let custom_client = Client::builder()
+        .timeout(Duration::from_secs(15))
+        .build()
+        .unwrap();
+
+    let server = Server::new();
+    let client = Jobsuche::from_client(
+        server.url(),
+        Credentials::default(),
+        custom_client,
+        ClientConfig::default(),
+    );
+
+    assert!(client.is_ok());
+}
+
+#[test]
+fn test_with_core() {
+    use jobsuche::core::ClientCore;
+
+    let core = ClientCore::new(
+        "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+        Credentials::default(),
+    )
+    .unwrap();
+
+    let client = Jobsuche::with_core(core);
+    assert!(client.is_ok());
+}
+
+#[test]
+fn test_with_config_and_core() {
+    use jobsuche::core::ClientCore;
+
+    let core = ClientCore::new(
+        "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service",
+        Credentials::default(),
+    )
+    .unwrap();
+
+    let config = ClientConfig {
+        timeout: Duration::from_secs(20),
+        connect_timeout: Duration::from_secs(5),
+        max_retries: 2,
+        retry_enabled: true,
+    };
+
+    let client = Jobsuche::with_config_and_core(core, config);
+    assert!(client.is_ok());
+}
+
+#[test]
+fn test_403_forbidden() {
+    let mut server = Server::new();
+
+    let _m = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(403)
+        .create();
+
+    let client = Jobsuche::new(server.url(), Credentials::default()).unwrap();
+
+    let result = client.job_details("test");
+    assert!(result.is_err());
+    assert!(matches!(result.unwrap_err(), jobsuche::Error::Forbidden));
+}
+
+#[test]
+fn test_405_method_not_allowed() {
+    let mut server = Server::new();
+
+    let _m = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(405)
+        .create();
+
+    let client = Jobsuche::new(server.url(), Credentials::default()).unwrap();
+
+    let result = client.job_details("test");
+    assert!(result.is_err());
+    assert!(matches!(
+        result.unwrap_err(),
+        jobsuche::Error::MethodNotAllowed
+    ));
+}
+
+#[test]
+fn test_500_server_error_with_api_errors() {
+    let mut server = Server::new();
+
+    let error_response = r#"{
+        "errors": [
+            {
+                "code": "INTERNAL_ERROR",
+                "message": "Internal server error"
+            }
+        ],
+        "errorMessages": ["Internal server error"]
+    }"#;
+
+    let _m = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(500)
+        .with_header("content-type", "application/json")
+        .with_body(error_response)
+        .create();
+
+    let config = ClientConfig {
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = Jobsuche::with_config(server.url(), Credentials::default(), config).unwrap();
+
+    let result = client.job_details("test");
+    assert!(result.is_err());
+
+    // Should get either Fault or Http error
+    assert!(matches!(
+        result.unwrap_err(),
+        jobsuche::Error::Fault { .. } | jobsuche::Error::Http(_)
+    ));
+}
+
+#[test]
+fn test_500_server_error_plain_text() {
+    let mut server = Server::new();
+
+    let _m = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(500)
+        .with_header("content-type", "text/plain")
+        .with_body("Internal Server Error")
+        .create();
+
+    let config = ClientConfig {
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = Jobsuche::with_config(server.url(), Credentials::default(), config).unwrap();
+
+    let result = client.job_details("test");
+    assert!(result.is_err());
+
+    // Should get HTTP error for unparseable response
+    assert!(matches!(result.unwrap_err(), jobsuche::Error::Http(_)));
+}
+
+#[test]
+fn test_employer_logo_success() {
+    let mut server = Server::new();
+
+    // Mock PNG image (minimal valid PNG)
+    let png_bytes: Vec<u8> = vec![
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+        0x00, 0x00, 0x00, 0x0D, // IHDR chunk length
+        0x49, 0x48, 0x44, 0x52, // IHDR
+        0x00, 0x00, 0x00, 0x01, // width
+        0x00, 0x00, 0x00, 0x01, // height
+        0x08, 0x06, 0x00, 0x00, 0x00, // bit depth, color type, etc.
+        0x1F, 0x15, 0xC4, 0x89, // CRC
+        0x00, 0x00, 0x00, 0x00, // IEND chunk
+        0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+    ];
+
+    let _m = server
+        .mock("GET", "/ed/v1/arbeitgeberlogo/test-hash")
+        .with_status(200)
+        .with_header("content-type", "image/png")
+        .with_body(&png_bytes)
+        .create();
+
+    let client = Jobsuche::new(server.url(), Credentials::default()).unwrap();
+
+    let logo = client.employer_logo("test-hash").unwrap();
+    assert_eq!(logo.len(), png_bytes.len());
+    assert_eq!(logo, png_bytes);
+}
+
+#[test]
+fn test_employer_logo_not_found() {
+    let mut server = Server::new();
+
+    let _m = server
+        .mock("GET", "/ed/v1/arbeitgeberlogo/nonexistent")
+        .with_status(404)
+        .create();
+
+    let client = Jobsuche::new(server.url(), Credentials::default()).unwrap();
+
+    let result = client.employer_logo("nonexistent");
+    assert!(result.is_err());
+    assert!(matches!(result.unwrap_err(), jobsuche::Error::NotFound));
+}
+
+#[test]
+fn test_search_interface() {
+    let server = Server::new();
+    let client = Jobsuche::new(server.url(), Credentials::default()).unwrap();
+
+    // Just verify we can create a search interface
+    let _search = client.search();
+}
+
+#[test]
+fn test_503_service_unavailable_no_retry() {
+    let mut server = Server::new();
+
+    let _m = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(503)
+        .create();
+
+    let config = ClientConfig {
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = Jobsuche::with_config(server.url(), Credentials::default(), config).unwrap();
+
+    let result = client.job_details("test");
+    assert!(result.is_err());
+
+    // Should get either Fault or Http error
+    assert!(matches!(
+        result.unwrap_err(),
+        jobsuche::Error::Fault { .. } | jobsuche::Error::Http(_)
+    ));
+}
+
+#[test]
+fn test_504_gateway_timeout() {
+    let mut server = Server::new();
+
+    let _m = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(504)
+        .create();
+
+    let config = ClientConfig {
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = Jobsuche::with_config(server.url(), Credentials::default(), config).unwrap();
+
+    let result = client.job_details("test");
+    assert!(result.is_err());
 }

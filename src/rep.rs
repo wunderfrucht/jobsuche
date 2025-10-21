@@ -286,3 +286,278 @@ impl Arbeitszeit {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_angebotsart_as_str() {
+        assert_eq!(Angebotsart::Arbeit.as_str(), "1");
+        assert_eq!(Angebotsart::Selbstaendigkeit.as_str(), "2");
+        assert_eq!(Angebotsart::Ausbildung.as_str(), "4");
+        assert_eq!(Angebotsart::PraktikumTrainee.as_str(), "34");
+    }
+
+    #[test]
+    fn test_befristung_as_str() {
+        assert_eq!(Befristung::Befristet.as_str(), "1");
+        assert_eq!(Befristung::Unbefristet.as_str(), "2");
+    }
+
+    #[test]
+    fn test_arbeitszeit_as_str() {
+        assert_eq!(Arbeitszeit::Vollzeit.as_str(), "vz");
+        assert_eq!(Arbeitszeit::Teilzeit.as_str(), "tz");
+        assert_eq!(Arbeitszeit::SchichtNachtarbeitWochenende.as_str(), "snw");
+        assert_eq!(Arbeitszeit::HeimTelearbeit.as_str(), "ho");
+        assert_eq!(Arbeitszeit::Minijob.as_str(), "mj");
+    }
+
+    #[test]
+    fn test_job_search_response_deserialization() {
+        let json = r#"{
+            "stellenangebote": [
+                {
+                    "refnr": "12345-TEST-S",
+                    "beruf": "Software Developer",
+                    "arbeitgeber": "Test Corp",
+                    "arbeitsort": {
+                        "ort": "Berlin",
+                        "plz": "10115"
+                    }
+                }
+            ],
+            "maxErgebnisse": 1,
+            "page": 0,
+            "size": 10
+        }"#;
+
+        let response: JobSearchResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.stellenangebote.len(), 1);
+        assert_eq!(response.max_ergebnisse, Some(1));
+        assert_eq!(response.page, Some(0));
+        assert_eq!(response.size, Some(10));
+    }
+
+    #[test]
+    fn test_job_listing_deserialization() {
+        let json = r#"{
+            "refnr": "10001-1234567-S",
+            "beruf": "Rust Developer",
+            "arbeitgeber": "Awesome Company",
+            "aktuelleVeroeffentlichungsdatum": "2025-10-21",
+            "arbeitsort": {
+                "ort": "Munich",
+                "plz": "80331",
+                "region": "Bayern"
+            }
+        }"#;
+
+        let listing: JobListing = serde_json::from_str(json).unwrap();
+        assert_eq!(listing.refnr, "10001-1234567-S");
+        assert_eq!(listing.beruf, "Rust Developer");
+        assert_eq!(listing.arbeitgeber, "Awesome Company");
+        assert_eq!(
+            listing.aktuelle_veroeffentlichungsdatum,
+            Some("2025-10-21".to_string())
+        );
+    }
+
+    #[test]
+    fn test_work_location_deserialization() {
+        let json = r#"{
+            "ort": "Berlin",
+            "plz": "10115",
+            "region": "Berlin",
+            "land": "Deutschland",
+            "koordinaten": {
+                "lat": 52.52,
+                "lon": 13.405
+            }
+        }"#;
+
+        let location: WorkLocation = serde_json::from_str(json).unwrap();
+        assert_eq!(location.ort, Some("Berlin".to_string()));
+        assert_eq!(location.plz, Some("10115".to_string()));
+        assert!(location.koordinaten.is_some());
+
+        let coords = location.koordinaten.unwrap();
+        assert_eq!(coords.lat, 52.52);
+        assert_eq!(coords.lon, 13.405);
+    }
+
+    #[test]
+    fn test_job_details_deserialization() {
+        let json = r#"{
+            "refnr": "10001-TEST-S",
+            "titel": "Senior Rust Engineer",
+            "arbeitgeber": "Tech GmbH",
+            "stellenbeschreibung": "Great opportunity...",
+            "arbeitszeitmodelle": ["VOLLZEIT", "TEILZEIT"],
+            "befristung": "unbefristet",
+            "arbeitsorte": [
+                {
+                    "ort": "Hamburg",
+                    "plz": "20095"
+                }
+            ],
+            "fertigkeiten": [
+                {
+                    "hierarchieName": "Programming",
+                    "auspraegungen": {
+                        "languages": ["Rust", "Go"]
+                    }
+                }
+            ]
+        }"#;
+
+        let details: JobDetails = serde_json::from_str(json).unwrap();
+        assert_eq!(details.refnr, Some("10001-TEST-S".to_string()));
+        assert_eq!(details.titel, Some("Senior Rust Engineer".to_string()));
+        assert_eq!(details.arbeitszeitmodelle.len(), 2);
+        assert_eq!(details.arbeitsorte.len(), 1);
+        assert_eq!(details.fertigkeiten.len(), 1);
+    }
+
+    #[test]
+    fn test_job_details_optional_fields() {
+        let json = r#"{
+            "refnr": "10001-MINIMAL-S"
+        }"#;
+
+        let details: JobDetails = serde_json::from_str(json).unwrap();
+        assert_eq!(details.refnr, Some("10001-MINIMAL-S".to_string()));
+        assert_eq!(details.titel, None);
+        assert_eq!(details.arbeitgeber, None);
+        assert_eq!(details.arbeitszeitmodelle.len(), 0);
+    }
+
+    #[test]
+    fn test_address_deserialization() {
+        let json = r#"{
+            "land": "Deutschland",
+            "region": "Bayern",
+            "plz": "80331",
+            "ort": "München",
+            "strasse": "Hauptstraße",
+            "strasseHausnummer": "Hauptstraße 123"
+        }"#;
+
+        let address: Address = serde_json::from_str(json).unwrap();
+        assert_eq!(address.land, "Deutschland");
+        assert_eq!(address.region, "Bayern");
+        assert_eq!(address.ort, "München");
+    }
+
+    #[test]
+    fn test_skill_deserialization() {
+        let json = r#"{
+            "hierarchieName": "Technical Skills",
+            "auspraegungen": {
+                "programming": ["Rust", "Python"],
+                "tools": ["Git", "Docker"]
+            }
+        }"#;
+
+        let skill: Skill = serde_json::from_str(json).unwrap();
+        assert_eq!(skill.hierarchie_name, "Technical Skills");
+        assert!(skill.auspraegungen.is_some());
+
+        let auspraegungen = skill.auspraegungen.unwrap();
+        assert!(auspraegungen.contains_key("programming"));
+        assert!(auspraegungen.contains_key("tools"));
+    }
+
+    #[test]
+    fn test_mobility_deserialization() {
+        let json = r#"{
+            "reisebereitschaft": "gelegentlich"
+        }"#;
+
+        let mobility: Mobility = serde_json::from_str(json).unwrap();
+        assert_eq!(mobility.reisebereitschaft, Some("gelegentlich".to_string()));
+    }
+
+    #[test]
+    fn test_leadership_skills_deserialization() {
+        let json = r#"{
+            "hatVollmacht": true,
+            "hatBudgetverantwortung": false
+        }"#;
+
+        let skills: LeadershipSkills = serde_json::from_str(json).unwrap();
+        assert_eq!(skills.hat_vollmacht, Some(true));
+        assert_eq!(skills.hat_budgetverantwortung, Some(false));
+    }
+
+    #[test]
+    fn test_coordinates_deserialization() {
+        let json = r#"{
+            "lat": 48.1351,
+            "lon": 11.5820
+        }"#;
+
+        let coords: Coordinates = serde_json::from_str(json).unwrap();
+        assert_eq!(coords.lat, 48.1351);
+        assert_eq!(coords.lon, 11.5820);
+    }
+
+    #[test]
+    fn test_angebotsart_equality() {
+        assert_eq!(Angebotsart::Arbeit, Angebotsart::Arbeit);
+        assert_ne!(Angebotsart::Arbeit, Angebotsart::Ausbildung);
+    }
+
+    #[test]
+    fn test_befristung_equality() {
+        assert_eq!(Befristung::Befristet, Befristung::Befristet);
+        assert_ne!(Befristung::Befristet, Befristung::Unbefristet);
+    }
+
+    #[test]
+    fn test_arbeitszeit_equality() {
+        assert_eq!(Arbeitszeit::Vollzeit, Arbeitszeit::Vollzeit);
+        assert_ne!(Arbeitszeit::Vollzeit, Arbeitszeit::Teilzeit);
+    }
+
+    #[test]
+    fn test_job_listing_serialization() {
+        let listing = JobListing {
+            hash_id: Some("hash123".to_string()),
+            refnr: "10001-TEST-S".to_string(),
+            beruf: "Developer".to_string(),
+            titel: Some("Senior Developer".to_string()),
+            arbeitgeber: "Company".to_string(),
+            aktuelle_veroeffentlichungsdatum: Some("2025-10-21".to_string()),
+            eintrittsdatum: None,
+            arbeitsort: WorkLocation {
+                plz: Some("10115".to_string()),
+                ort: Some("Berlin".to_string()),
+                strasse: None,
+                region: None,
+                land: None,
+                koordinaten: None,
+                entfernung: None,
+            },
+            modifikations_timestamp: None,
+            externe_url: None,
+            kundennummer_hash: None,
+        };
+
+        let json = serde_json::to_string(&listing).unwrap();
+        assert!(json.contains("10001-TEST-S"));
+        assert!(json.contains("Developer"));
+    }
+
+    #[test]
+    fn test_empty_job_search_response() {
+        let json = r#"{
+            "stellenangebote": []
+        }"#;
+
+        let response: JobSearchResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.stellenangebote.len(), 0);
+        assert_eq!(response.max_ergebnisse, None);
+    }
+}

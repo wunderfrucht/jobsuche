@@ -2,8 +2,7 @@
 //!
 //! This module provides an async/await interface for non-blocking API calls.
 
-use std::time::Duration;
-use tracing::{debug, warn};
+use tracing::debug;
 
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::{Client, Method, StatusCode};
@@ -50,6 +49,7 @@ use crate::{ApiErrors, Credentials, Error, JobDetails, Result};
 pub struct JobsucheAsync {
     pub(crate) core: ClientCore,
     client: ClientWithMiddleware,
+    #[allow(dead_code)]
     config: ClientConfig,
 }
 
@@ -302,12 +302,20 @@ impl JobsucheAsync {
                     .get("Retry-After")
                     .and_then(|v| v.to_str().ok())
                     .and_then(|s| {
-                        // Try parsing as seconds (numeric)
-                        s.parse::<u64>().ok().or_else(|| {
-                            // Try parsing as HTTP-date (not implemented for simplicity)
-                            // In production, would parse RFC 2822/RFC 3339 dates
-                            None
-                        })
+                        // Try parsing as delay-seconds (numeric)
+                        if let Ok(seconds) = s.parse::<u64>() {
+                            return Some(seconds);
+                        }
+
+                        // Try parsing as HTTP-date
+                        if let Ok(date) = httpdate::parse_http_date(s) {
+                            if let Ok(duration) = date.duration_since(std::time::SystemTime::now())
+                            {
+                                return Some(duration.as_secs());
+                            }
+                        }
+
+                        None
                     });
 
                 Error::RateLimited { retry_after }
@@ -338,6 +346,7 @@ impl JobsucheAsync {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::Duration;
 
     #[tokio::test]
     async fn test_async_client_creation() {
