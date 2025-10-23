@@ -1,6 +1,6 @@
 # jobsuche
 
-[![Rust](https://img.shields.io/badge/rust-1.70%2B-blue.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-blue.svg)](https://www.rust-lang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/wunderfrucht/jobsuche/graph/badge.svg?token=riQYXs6xgb)](https://codecov.io/gh/wunderfrucht/jobsuche)
 
