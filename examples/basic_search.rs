@@ -76,19 +76,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 println!("\nWork locations:");
                 for location in &details.arbeitsorte {
-                    println!(
-                        "  - {}, {} {}",
-                        location.ort.as_deref().unwrap_or("unknown"),
-                        location.plz.as_deref().unwrap_or(""),
-                        location.region.as_deref().unwrap_or("unknown")
-                    );
+                    if let Some(adresse) = &location.adresse {
+                        println!(
+                            "  - {}, {} {}",
+                            adresse.ort.as_deref().unwrap_or("unknown"),
+                            adresse.plz.as_deref().unwrap_or(""),
+                            adresse.region.as_deref().unwrap_or("unknown")
+                        );
+                    }
                 }
 
-                if !details.fertigkeiten.is_empty() {
-                    println!("\nRequired skills:");
-                    for skill in &details.fertigkeiten {
-                        println!("  - {}", skill.hierarchie_name);
-                    }
+                if let Some(partner) = &details.allianzpartner {
+                    println!("\nAllianzpartner: {}", partner);
                 }
             }
             Err(e) => {

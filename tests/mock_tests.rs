@@ -195,25 +195,25 @@ fn test_job_details_mock() {
     let mut server = Server::new();
 
     let mock_response = r#"{
-        "refnr": "10001-DETAILS-S",
-        "titel": "Senior Rust Developer",
-        "arbeitgeber": "Test Company",
-        "stellenbeschreibung": "Looking for an experienced Rust developer...",
-        "arbeitsorte": [
+        "referenznummer": "10001-DETAILS-S",
+        "stellenangebotsTitel": "Senior Rust Developer",
+        "firma": "Test Company",
+        "stellenangebotsBeschreibung": "Looking for an experienced Rust developer...",
+        "hauptberuf": "Softwareentwickler/in",
+        "stellenlokationen": [
             {
-                "ort": "Berlin",
-                "plz": "10115",
-                "region": "Berlin"
+                "adresse": {
+                    "ort": "Berlin",
+                    "plz": "10115",
+                    "region": "Berlin",
+                    "land": "Deutschland"
+                },
+                "breite": 52.52,
+                "laenge": 13.40
             }
         ],
-        "fertigkeiten": [
-            {
-                "hierarchieName": "Rust Programming"
-            },
-            {
-                "hierarchieName": "Systems Programming"
-            }
-        ]
+        "arbeitszeitVollzeit": true,
+        "verguetungsangabe": "KEINE_ANGABEN"
     }"#;
 
     // The refnr will be base64 encoded
@@ -233,7 +233,15 @@ fn test_job_details_mock() {
     assert_eq!(details.refnr, Some("10001-DETAILS-S".to_string()));
     assert_eq!(details.titel, Some("Senior Rust Developer".to_string()));
     assert_eq!(details.arbeitgeber, Some("Test Company".to_string()));
-    assert_eq!(details.fertigkeiten.len(), 2);
+    assert_eq!(
+        details.stellenbeschreibung,
+        Some("Looking for an experienced Rust developer...".to_string())
+    );
+    assert_eq!(
+        details.hauptberuf,
+        Some("Softwareentwickler/in".to_string())
+    );
+    assert_eq!(details.arbeitsorte.len(), 1);
 }
 
 #[test]

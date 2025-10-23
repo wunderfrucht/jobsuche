@@ -98,79 +98,91 @@ pub struct FacetData {
 }
 
 /// Detailed job information
+///
+/// This structure maps to the job details endpoint response.
+/// Field names are mapped via serde rename attributes to match the API's format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct JobDetails {
-    #[serde(default)]
-    pub hash_id: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "referenznummer")]
     pub refnr: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "stellenangebotsTitel")]
     pub titel: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "stellenangebotsart")]
     pub stellenangebots_art: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "firma")]
     pub arbeitgeber: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "arbeitgeberKundennummerHash")]
     pub arbeitgeber_hash_id: Option<String>,
+    #[serde(default)]
     pub hauptberuf: Option<String>,
-    pub beruf: Option<String>,
-    #[serde(default)]
-    pub branchengruppe: Option<String>,
-    #[serde(default)]
-    pub branche: Option<String>,
-    #[serde(default)]
-    pub aktuelle_veroeffentlichungsdatum: Option<String>,
-    #[serde(default)]
-    pub eintrittsdatum: Option<String>,
-    #[serde(default)]
-    pub erste_veroeffentlichungsdatum: Option<String>,
-    #[serde(default)]
-    pub modifikations_timestamp: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "stellenangebotsBeschreibung")]
     pub stellenbeschreibung: Option<String>,
-    #[serde(default)]
-    pub arbeitsorte: Vec<WorkLocation>,
-    #[serde(default)]
-    pub arbeitgeber_adresse: Option<Address>,
-    #[serde(default)]
-    pub arbeitszeitmodelle: Vec<String>,
-    #[serde(default)]
-    pub befristung: Option<String>,
+    #[serde(default, rename = "stellenlokationen")]
+    pub arbeitsorte: Vec<JobLocation>,
+    #[serde(default, rename = "arbeitszeitVollzeit")]
+    pub arbeitszeit_vollzeit: Option<bool>,
+    #[serde(default, rename = "verguetungsangabe")]
+    pub verguetung: Option<String>,
     #[serde(default)]
     pub vertragsdauer: Option<String>,
     #[serde(default)]
-    pub uebernahme: Option<bool>,
+    pub eintrittszeitraum: Option<DateRange>,
     #[serde(default)]
-    pub betriebsgroesse: Option<String>,
+    pub veroeffentlichungszeitraum: Option<DateRange>,
+    #[serde(default, rename = "datumErsteVeroeffentlichung")]
+    pub erste_veroeffentlichungsdatum: Option<String>,
     #[serde(default)]
-    pub anzahl_offene_stellen: Option<u32>,
-    #[serde(default)]
+    pub aenderungsdatum: Option<String>,
+    #[serde(default, rename = "istBetreut")]
+    pub ist_betreut: Option<bool>,
+    #[serde(default, rename = "istBehinderungGefordert")]
     pub nur_fuer_schwerbehinderte: Option<bool>,
-    #[serde(default)]
-    pub fuer_fluechtlinge_geeignet: Option<bool>,
-    #[serde(default)]
-    pub arbeitgeberdarstellung: Option<String>,
-    #[serde(default)]
-    pub arbeitgeberdarstellung_url: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "istGeringfuegigeBeschaeftigung")]
+    pub ist_geringfuegige_beschaeftigung: Option<bool>,
+    #[serde(default, rename = "istArbeitnehmerUeberlassung")]
+    pub ist_arbeitnehmer_ueberlassung: Option<bool>,
+    #[serde(default, rename = "istPrivateArbeitsvermittlung")]
+    pub ist_private_arbeitsvermittlung: Option<bool>,
+    #[serde(default, rename = "quereinstiegGeeignet")]
+    pub quereinstieg_geeignet: Option<bool>,
+    #[serde(default, rename = "allianzpartnerName")]
     pub allianzpartner: Option<String>,
-    #[serde(default)]
+    #[serde(default, rename = "allianzpartnerUrl")]
     pub allianzpartner_url: Option<String>,
     #[serde(default)]
-    pub verguetung: Option<String>,
+    pub chiffrenummer: Option<String>,
+}
+
+/// Job location information (from job details endpoint)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JobLocation {
+    pub adresse: Option<LocationAddress>,
     #[serde(default)]
-    pub fertigkeiten: Vec<Skill>,
+    pub breite: Option<f64>,
     #[serde(default)]
-    pub mobilitaet: Option<Mobility>,
+    pub laenge: Option<f64>,
+}
+
+/// Address information within a job location
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LocationAddress {
     #[serde(default)]
-    pub fuehrungskompetenzen: Option<LeadershipSkills>,
+    pub plz: Option<String>,
     #[serde(default)]
-    pub ist_betreut: Option<bool>,
+    pub ort: Option<String>,
     #[serde(default)]
-    pub ist_google_jobs_relevant: Option<bool>,
+    pub region: Option<String>,
     #[serde(default)]
-    pub anzeige_anonym: Option<bool>,
+    pub land: Option<String>,
+}
+
+/// Date range with optional 'von' and 'bis' dates
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DateRange {
+    #[serde(default)]
+    pub von: Option<String>,
+    #[serde(default)]
+    pub bis: Option<String>,
 }
 
 /// Address information
@@ -390,23 +402,17 @@ mod tests {
     #[test]
     fn test_job_details_deserialization() {
         let json = r#"{
-            "refnr": "10001-TEST-S",
-            "titel": "Senior Rust Engineer",
-            "arbeitgeber": "Tech GmbH",
-            "stellenbeschreibung": "Great opportunity...",
-            "arbeitszeitmodelle": ["VOLLZEIT", "TEILZEIT"],
-            "befristung": "unbefristet",
-            "arbeitsorte": [
+            "referenznummer": "10001-TEST-S",
+            "stellenangebotsTitel": "Senior Rust Engineer",
+            "firma": "Tech GmbH",
+            "stellenangebotsBeschreibung": "Great opportunity...",
+            "arbeitszeitVollzeit": true,
+            "vertragsdauer": "unbefristet",
+            "stellenlokationen": [
                 {
-                    "ort": "Hamburg",
-                    "plz": "20095"
-                }
-            ],
-            "fertigkeiten": [
-                {
-                    "hierarchieName": "Programming",
-                    "auspraegungen": {
-                        "languages": ["Rust", "Go"]
+                    "adresse": {
+                        "ort": "Hamburg",
+                        "plz": "20095"
                     }
                 }
             ]
@@ -415,22 +421,26 @@ mod tests {
         let details: JobDetails = serde_json::from_str(json).unwrap();
         assert_eq!(details.refnr, Some("10001-TEST-S".to_string()));
         assert_eq!(details.titel, Some("Senior Rust Engineer".to_string()));
-        assert_eq!(details.arbeitszeitmodelle.len(), 2);
+        assert_eq!(details.arbeitgeber, Some("Tech GmbH".to_string()));
+        assert_eq!(
+            details.stellenbeschreibung,
+            Some("Great opportunity...".to_string())
+        );
+        assert_eq!(details.arbeitszeit_vollzeit, Some(true));
         assert_eq!(details.arbeitsorte.len(), 1);
-        assert_eq!(details.fertigkeiten.len(), 1);
     }
 
     #[test]
     fn test_job_details_optional_fields() {
         let json = r#"{
-            "refnr": "10001-MINIMAL-S"
+            "referenznummer": "10001-MINIMAL-S"
         }"#;
 
         let details: JobDetails = serde_json::from_str(json).unwrap();
         assert_eq!(details.refnr, Some("10001-MINIMAL-S".to_string()));
         assert_eq!(details.titel, None);
         assert_eq!(details.arbeitgeber, None);
-        assert_eq!(details.arbeitszeitmodelle.len(), 0);
+        assert_eq!(details.arbeitszeit_vollzeit, None);
     }
 
     #[test]
