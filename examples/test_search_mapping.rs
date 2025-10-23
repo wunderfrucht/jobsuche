@@ -28,9 +28,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  beruf: {}", job.beruf);
         println!("  titel: {:?}", job.titel);
         println!("  arbeitgeber: {}", job.arbeitgeber);
-        println!("  aktuelle_veroeffentlichungsdatum: {:?}", job.aktuelle_veroeffentlichungsdatum);
+        println!(
+            "  aktuelle_veroeffentlichungsdatum: {:?}",
+            job.aktuelle_veroeffentlichungsdatum
+        );
         println!("  eintrittsdatum: {:?}", job.eintrittsdatum);
-        println!("  modifikations_timestamp: {:?}", job.modifikations_timestamp);
+        println!(
+            "  modifikations_timestamp: {:?}",
+            job.modifikations_timestamp
+        );
         println!("  kundennummer_hash: {:?}", job.kundennummer_hash);
 
         println!("  Location:");
