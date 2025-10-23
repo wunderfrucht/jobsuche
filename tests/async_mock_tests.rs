@@ -60,17 +60,25 @@ async fn test_async_job_details_mock() {
     let mut server = Server::new_async().await;
 
     let mock_response = r#"{
-        "refnr": "10001-1001601666-S",
-        "titel": "Senior Rust Developer",
-        "arbeitgeber": "Tech Company GmbH",
-        "stellenbeschreibung": "We are looking for an experienced Rust developer...",
-        "arbeitszeitmodelle": ["VOLLZEIT"],
-        "arbeitsorte": [
+        "referenznummer": "10001-1001601666-S",
+        "stellenangebotsTitel": "Senior Rust Developer",
+        "firma": "Tech Company GmbH",
+        "stellenangebotsBeschreibung": "We are looking for an experienced Rust developer...",
+        "hauptberuf": "Softwareentwickler/in",
+        "arbeitszeitVollzeit": true,
+        "stellenlokationen": [
             {
-                "ort": "Berlin",
-                "plz": "10115"
+                "adresse": {
+                    "ort": "Berlin",
+                    "plz": "10115",
+                    "region": "Berlin",
+                    "land": "Deutschland"
+                },
+                "breite": 52.52,
+                "laenge": 13.40
             }
-        ]
+        ],
+        "verguetungsangabe": "KEINE_ANGABEN"
     }"#;
 
     // The refnr gets base64url encoded
@@ -91,6 +99,12 @@ async fn test_async_job_details_mock() {
     assert_eq!(job.refnr, Some("10001-1001601666-S".to_string()));
     assert_eq!(job.titel, Some("Senior Rust Developer".to_string()));
     assert_eq!(job.arbeitgeber, Some("Tech Company GmbH".to_string()));
+    assert_eq!(
+        job.stellenbeschreibung,
+        Some("We are looking for an experienced Rust developer...".to_string())
+    );
+    assert_eq!(job.hauptberuf, Some("Softwareentwickler/in".to_string()));
+    assert_eq!(job.arbeitsorte.len(), 1);
 }
 
 #[tokio::test]

@@ -21,7 +21,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  max_ergebnisse: {:?}", results.max_ergebnisse);
     println!("  page: {:?}", results.page);
     println!("  size: {:?}", results.size);
-    println!("  facetten: {}", if results.facetten.is_some() { "Present" } else { "None" });
+    println!(
+        "  facetten: {}",
+        if results.facetten.is_some() {
+            "Present"
+        } else {
+            "None"
+        }
+    );
 
     if let Some(facetten) = &results.facetten {
         println!("\nFacets data:");
