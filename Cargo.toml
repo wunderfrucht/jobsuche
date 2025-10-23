@@ -1,6 +1,6 @@
 [package]
 name = "jobsuche"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["wunderfrucht"]
 description = "Rust interface for the Bundesagentur für Arbeit Jobsuche API"
 documentation = "https://docs.rs/jobsuche"
