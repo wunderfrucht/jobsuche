@@ -63,9 +63,8 @@ impl ClientCore {
         H: Into<String>,
     {
         let host_string = host.into();
-        let parsed_host = Url::parse(&host_string).map_err(|e| {
+        let parsed_host = Url::parse(&host_string).inspect_err(|e| {
             debug!("Failed to parse host URL '{}': {}", host_string, e);
-            e
         })?;
 
         Ok(ClientCore {
