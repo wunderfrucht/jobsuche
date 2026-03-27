@@ -21,10 +21,18 @@ pub struct EmptyResponse;
 /// # Default API Key
 ///
 /// The public API key is: `jobboerse-jobsuche`
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum Credentials {
     /// API Key authentication (default: "jobboerse-jobsuche")
     ApiKey(String),
+}
+
+impl std::fmt::Debug for Credentials {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ApiKey(_) => f.debug_tuple("ApiKey").field(&"[REDACTED]").finish(),
+        }
+    }
 }
 
 impl Default for Credentials {
@@ -153,5 +161,19 @@ mod tests {
         let encoded = encode_refnr(refnr);
         let decoded = decode_refnr(&encoded).unwrap();
         assert_eq!(refnr, decoded);
+    }
+
+    #[test]
+    fn test_credentials_debug_redacts_key() {
+        let creds = Credentials::default();
+        let debug_output = format!("{:?}", creds);
+        assert!(
+            !debug_output.contains("jobboerse-jobsuche"),
+            "API key must not appear in Debug output"
+        );
+        assert!(
+            debug_output.contains("REDACTED"),
+            "Debug output should show REDACTED"
+        );
     }
 }
