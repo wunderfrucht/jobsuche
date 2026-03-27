@@ -419,6 +419,7 @@ impl Jobsuche {
                             }
                         }
 
+                        warn!("Retry-After header present but unparseable: {:?}", s);
                         None
                     });
 

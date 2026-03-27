@@ -2,7 +2,7 @@
 //!
 //! This module provides an async/await interface for non-blocking API calls.
 
-use tracing::debug;
+use tracing::{debug, warn};
 
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::{Client, Method, StatusCode};
@@ -289,6 +289,12 @@ impl JobsucheAsync {
     }
 
     /// Convert HTTP status and response into an appropriate Error (async)
+    ///
+    /// Note: The async client uses `reqwest-retry` middleware for automatic retries of
+    /// transient errors. However, the middleware does not honour the `Retry-After` header
+    /// when scheduling retries — it uses its own exponential backoff policy instead.
+    /// The `Retry-After` value is still parsed here and surfaced in `Error::RateLimited`
+    /// so callers can implement their own delay logic if needed.
     async fn error_from_status(&self, status: StatusCode, response: reqwest::Response) -> Error {
         match status {
             StatusCode::UNAUTHORIZED => Error::Unauthorized,
@@ -315,6 +321,7 @@ impl JobsucheAsync {
                             }
                         }
 
+                        warn!("Retry-After header present but unparseable: {:?}", s);
                         None
                     });
 
