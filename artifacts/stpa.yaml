@@ -1,0 +1,659 @@
+artifacts:
+  # ──────────────────────────────────────────────────
+  # Step 1a — Losses
+  # ──────────────────────────────────────────────────
+
+  - id: L-001
+    type: loss
+    title: Users receive incomplete job search results
+    status: accepted
+    description: >
+      Job seekers miss relevant job postings because the library fails to
+      retrieve all matching results from the API. This can occur when
+      pagination terminates prematurely, when queries are malformed, or when
+      transient errors cause pages to be skipped without recovery.
+    tags: [stpa, completeness]
+    fields:
+      stakeholders: [job-seekers]
+
+  - id: L-002
+    type: loss
+    title: Users receive corrupted or incorrect job data
+    status: accepted
+    description: >
+      Job data returned by the library is inaccurate, incomplete, or
+      malformed. This includes missing fields due to deserialization
+      failures, garbled reference numbers from encoding errors, or stale
+      data from incorrect caching. Users may make employment decisions
+      based on wrong information.
+    tags: [stpa, integrity]
+    fields:
+      stakeholders: [job-seekers]
+
+  - id: L-003
+    type: loss
+    title: Service becomes unavailable due to API rate limiting or ban
+    status: accepted
+    description: >
+      The library causes excessive load on the Bundesagentur fur Arbeit
+      API, triggering rate limiting (HTTP 429) or IP-level bans that
+      prevent the calling application from accessing job data for an
+      extended period. All users of the application are affected.
+    tags: [stpa, availability]
+    fields:
+      stakeholders: [job-seekers, api-provider]
+
+  - id: L-004
+    type: loss
+    title: User credentials or API keys are exposed
+    status: accepted
+    description: >
+      API keys or other authentication credentials are leaked through
+      insecure transport, logging, error messages, or incorrect TLS
+      configuration. Exposed credentials could be used for unauthorized
+      API access or to impersonate the application.
+    tags: [stpa, confidentiality]
+    fields:
+      stakeholders: [job-seekers, api-provider, application-developers]
+
+  # ──────────────────────────────────────────────────
+  # Step 1b — Hazards
+  # ──────────────────────────────────────────────────
+
+  - id: H-001
+    type: hazard
+    title: Pagination stops too early
+    status: accepted
+    description: >
+      The pagination controller terminates iteration before all available
+      result pages have been fetched. This can happen when a partial page
+      is misinterpreted as the final page, when the hardcoded page limit
+      diverges from the API's actual limit, or when a transient error on
+      an intermediate page is treated as end-of-results.
+    tags: [stpa, pagination]
+    links:
+      - type: leads-to-loss
+        target: L-001
+    fields:
+      severity: critical
+
+  - id: H-002
+    type: hazard
+    title: API response deserialization silently drops fields
+    status: accepted
+    description: >
+      When the upstream API adds, renames, or restructures fields in its
+      JSON response, serde deserialization succeeds but silently fills
+      missing fields with default values (via #[serde(default)]). The
+      caller receives a JobDetails or JobListing struct that appears
+      valid but contains zero/empty values where real data should be.
+    tags: [stpa, deserialization]
+    links:
+      - type: leads-to-loss
+        target: L-002
+    fields:
+      severity: critical
+
+  - id: H-003
+    type: hazard
+    title: Retry logic sends excessive requests
+    status: accepted
+    description: >
+      The retry controller issues requests faster or more frequently
+      than the API permits. This can occur when exponential backoff
+      is misconfigured, when the Retry-After header is not parsed
+      correctly, or when multiple concurrent callers each retry
+      independently, multiplying the request rate.
+    tags: [stpa, retry, rate-limiting]
+    links:
+      - type: leads-to-loss
+        target: L-003
+    fields:
+      severity: marginal
+
+  - id: H-004
+    type: hazard
+    title: API key transmitted over unencrypted connection
+    status: accepted
+    description: >
+      The API key is sent in an HTTP request that does not use TLS
+      encryption, allowing network observers to intercept the credential.
+      This could occur if the base URL is accidentally set to http://
+      instead of https://, or if TLS certificate validation is disabled.
+    tags: [stpa, security, tls]
+    links:
+      - type: leads-to-loss
+        target: L-004
+    fields:
+      severity: critical
+
+  - id: H-005
+    type: hazard
+    title: Base64 encoding produces incorrect reference numbers
+    status: accepted
+    description: >
+      The base64 encoding or decoding of job reference numbers produces
+      incorrect values. This causes the library to request the wrong job
+      details endpoint, returning data for a different job or a not-found
+      error. The caller cannot distinguish between a correct "not found"
+      and a reference number encoding failure.
+    tags: [stpa, encoding, base64]
+    links:
+      - type: leads-to-loss
+        target: L-002
+    fields:
+      severity: critical
+
+  # ──────────────────────────────────────────────────
+  # Step 1c — System Constraints
+  # ──────────────────────────────────────────────────
+
+  - id: SC-001
+    type: system-constraint
+    title: Pagination must respect API page limits
+    status: accepted
+    description: >
+      The pagination controller must stop at the API's actual page limit
+      and must not assume a hardcoded maximum. When the API reports the
+      total number of results (maxErgebnisse), pagination must use that
+      value in conjunction with the page size to determine when all pages
+      have been fetched.
+    tags: [stpa, pagination]
+    links:
+      - type: prevents
+        target: H-001
+
+  - id: SC-002
+    type: system-constraint
+    title: Response types must model all API fields or detect unmodeled fields
+    status: accepted
+    description: >
+      The response deserialization types (JobListing, JobDetails, etc.)
+      must either model all fields returned by the API or use a mechanism
+      (such as serde deny_unknown_fields or a catch-all HashMap) to
+      detect when the API returns fields that are not modeled. Silent
+      data loss during deserialization must be prevented.
+    tags: [stpa, deserialization]
+    links:
+      - type: prevents
+        target: H-002
+
+  - id: SC-003
+    type: system-constraint
+    title: Retry backoff must respect Retry-After headers and cap total retries
+    status: accepted
+    description: >
+      The retry controller must parse and respect Retry-After headers
+      from 429 responses, supporting both delay-seconds and HTTP-date
+      formats. When no Retry-After header is present, exponential backoff
+      must be used. Total retry attempts must be capped at a configurable
+      maximum (default 3) and maximum delay must be bounded.
+    tags: [stpa, retry, rate-limiting]
+    links:
+      - type: prevents
+        target: H-003
+
+  - id: SC-004
+    type: system-constraint
+    title: All API communication must use TLS
+    status: accepted
+    description: >
+      All HTTP requests to the Bundesagentur fur Arbeit API must use
+      HTTPS with valid TLS certificates. The base URL must enforce the
+      https:// scheme. TLS certificate validation must not be disabled
+      in production configurations.
+    tags: [stpa, security, tls]
+    links:
+      - type: prevents
+        target: H-004
+
+  - id: SC-005
+    type: system-constraint
+    title: Base64 encode/decode must be roundtrip-safe
+    status: accepted
+    description: >
+      The base64 encoding used for job reference numbers must be
+      roundtrip-safe: decode(encode(refnr)) == refnr for all valid
+      reference number inputs. The encoding must use the correct base64
+      variant (standard with padding) expected by the API.
+    tags: [stpa, encoding, base64]
+    links:
+      - type: prevents
+        target: H-005
+
+  # ──────────────────────────────────────────────────
+  # Step 2 — Control Structure
+  # ──────────────────────────────────────────────────
+
+  # Controllers
+
+  - id: CTRL-001
+    type: controller
+    title: Pagination Controller
+    status: accepted
+    description: >
+      Manages page iteration for job search results. Maintains a process
+      model of the current page index, total available results
+      (maxErgebnisse), and page size. Decides when to fetch the next page
+      and when to stop iteration. Implemented in both sync (JobIterator)
+      and async (stream) variants.
+    tags: [stpa, control-structure, pagination]
+    fields:
+      controller-type: automated
+      source-file: src/pagination.rs
+      process-model:
+        - "Current page index"
+        - "Total results available (maxErgebnisse)"
+        - "Page size"
+        - "Maximum page limit (100)"
+        - "Whether last page returned fewer results than page size"
+
+  - id: CTRL-002
+    type: controller
+    title: Retry Controller
+    status: accepted
+    description: >
+      Manages retry logic for failed HTTP requests. Maintains a process
+      model of the retry count, backoff duration, and whether the last
+      failure was retryable. The sync client implements this via the
+      backon crate; the async client uses reqwest-retry middleware.
+    tags: [stpa, control-structure, retry]
+    fields:
+      controller-type: automated
+      source-file: src/sync.rs
+      process-model:
+        - "Current retry attempt count"
+        - "Maximum retry attempts allowed"
+        - "Current backoff duration"
+        - "Retry-After value from last 429 response"
+        - "Whether retry is enabled"
+
+  - id: CTRL-003
+    type: controller
+    title: HTTP Client
+    status: accepted
+    description: >
+      Manages HTTP connections, TLS negotiation, and request/response
+      transport. This is the reqwest library, which is an external
+      dependency. It enforces TLS certificate validation and connection
+      pooling.
+    tags: [stpa, control-structure, http]
+    fields:
+      controller-type: automated
+      source-file: reqwest (external dependency)
+      process-model:
+        - "Connection pool state"
+        - "TLS configuration"
+        - "Timeout settings"
+
+  # Controlled Processes
+
+  - id: CP-001
+    type: controlled-process
+    title: API Request Pipeline
+    status: accepted
+    description: >
+      The HTTP request/response cycle between the library and the
+      rest.arbeitsagentur.de API. Includes URL construction, header
+      injection (API key, User-Agent), request serialization, network
+      transport, and response deserialization.
+    tags: [stpa, control-structure, http]
+
+  - id: CP-002
+    type: controlled-process
+    title: Result Accumulation
+    status: accepted
+    description: >
+      The process of collecting and yielding paginated job search results
+      to the caller. In the sync client this is the JobIterator's internal
+      buffer; in the async client this is the stream's yield mechanism.
+      Results are buffered one page at a time and yielded individually.
+    tags: [stpa, control-structure, pagination]
+
+  # Control Actions
+
+  - id: CA-001
+    type: control-action
+    title: Fetch next page
+    status: accepted
+    description: >
+      The pagination controller issues a request to fetch the next page
+      of job search results from the API. This involves incrementing the
+      page index and initiating a new HTTP request through the API
+      request pipeline.
+    tags: [stpa, control-action, pagination]
+    links:
+      - type: issued-by
+        target: CTRL-001
+      - type: acts-on
+        target: CP-001
+    fields:
+      action: Fetch the next page of job search results from the API
+
+  - id: CA-002
+    type: control-action
+    title: Stop pagination
+    status: accepted
+    description: >
+      The pagination controller signals that no more pages should be
+      fetched. This terminates the iterator/stream and delivers the
+      final results to the caller. Triggered when the page limit is
+      reached, when maxErgebnisse results have been collected, or when
+      a page returns fewer results than the page size.
+    tags: [stpa, control-action, pagination]
+    links:
+      - type: issued-by
+        target: CTRL-001
+      - type: acts-on
+        target: CP-002
+    fields:
+      action: Stop fetching pages and terminate the result iterator/stream
+
+  - id: CA-003
+    type: control-action
+    title: Retry request
+    status: accepted
+    description: >
+      The retry controller re-issues a failed HTTP request after waiting
+      for the appropriate backoff duration. The backoff may come from a
+      Retry-After header or from exponential backoff calculation.
+    tags: [stpa, control-action, retry]
+    links:
+      - type: issued-by
+        target: CTRL-002
+      - type: acts-on
+        target: CP-001
+    fields:
+      action: Re-issue a failed HTTP request after backoff delay
+
+  # ──────────────────────────────────────────────────
+  # Step 3 — Unsafe Control Actions
+  # ──────────────────────────────────────────────────
+
+  - id: UCA-001
+    type: uca
+    title: Pagination does not stop when API page limit reached
+    status: accepted
+    description: >
+      The pagination controller continues requesting pages beyond the
+      API's maximum page limit (100 pages). The API may return errors
+      or empty results for pages beyond the limit, but the controller
+      does not issue the "stop pagination" action.
+    tags: [stpa, pagination]
+    links:
+      - type: issued-by
+        target: CTRL-001
+      - type: leads-to-hazard
+        target: H-001
+    fields:
+      uca-type: not-providing
+      context: >
+        The API has returned 100 pages of results but more results may
+        exist. The pagination controller should stop but does not issue
+        the stop pagination action.
+      rationale: >
+        The API enforces a maximum of 100 pages per query. Requesting
+        beyond this limit will not return additional results and may
+        cause errors, but the real hazard is that the controller's
+        failure to stop correctly indicates a flawed process model that
+        could also cause premature stops.
+
+  - id: UCA-002
+    type: uca
+    title: Pagination stops too early on partial page
+    status: accepted
+    description: >
+      The pagination controller issues the "stop pagination" action when
+      it receives a page with fewer results than the requested page size,
+      even though this partial page is not the last page. This can happen
+      when the API returns a temporarily short page due to internal
+      filtering or eventual consistency.
+    tags: [stpa, pagination]
+    links:
+      - type: issued-by
+        target: CTRL-001
+      - type: leads-to-hazard
+        target: H-001
+    fields:
+      uca-type: too-early-too-late
+      context: >
+        The API returns a page with fewer results than the page size
+        but there are still more pages available. The pagination
+        controller incorrectly interprets this as end-of-results.
+      rationale: >
+        The pagination controller uses partial page size as a heuristic
+        for detecting the last page. If the API returns a short page
+        mid-pagination (e.g., due to concurrent deletions), the
+        controller will stop early and miss remaining results.
+
+  - id: UCA-003
+    type: uca
+    title: Retry controller retries too aggressively
+    status: accepted
+    description: >
+      The retry controller issues retry requests too frequently, either
+      by ignoring the Retry-After header, using insufficient backoff, or
+      retrying immediately after a 429 response. This amplifies the load
+      on the API and may escalate from rate limiting to an IP ban.
+    tags: [stpa, retry, rate-limiting]
+    links:
+      - type: issued-by
+        target: CTRL-002
+      - type: leads-to-hazard
+        target: H-003
+    fields:
+      uca-type: too-early-too-late
+      context: >
+        The API has returned a 429 response with a Retry-After header.
+        The retry controller should wait for the specified duration but
+        retries too early.
+      rationale: >
+        Aggressive retries after rate limiting compound the problem.
+        Each premature retry counts against the rate limit, potentially
+        triggering stricter throttling or permanent bans.
+
+  - id: UCA-004
+    type: uca
+    title: Retry controller does not retry on transient errors
+    status: accepted
+    description: >
+      The retry controller fails to issue a retry for a request that
+      failed due to a transient error (network timeout, 503, 504). The
+      error propagates to the caller, causing the pagination to abort
+      entirely and return incomplete results.
+    tags: [stpa, retry, availability]
+    links:
+      - type: issued-by
+        target: CTRL-002
+      - type: leads-to-hazard
+        target: H-001
+    fields:
+      uca-type: not-providing
+      context: >
+        A request has failed with a transient error (network timeout,
+        HTTP 503, HTTP 504) and retry attempts remain. The retry
+        controller should retry but does not.
+      rationale: >
+        Transient errors are expected in production. Failing to retry
+        causes the entire pagination sequence to abort, losing all
+        results from subsequent pages.
+
+  # ──────────────────────────────────────────────────
+  # Step 3b — Controller Constraints
+  # ──────────────────────────────────────────────────
+
+  - id: CC-001
+    type: controller-constraint
+    title: Pagination must check page count against limit
+    status: accepted
+    description: >
+      The pagination controller must compare the current page index
+      against the maximum page limit (100) on every iteration. When
+      the limit is reached, the controller must stop pagination
+      regardless of whether more results appear to be available.
+    tags: [stpa, pagination]
+    links:
+      - type: constrains-controller
+        target: CTRL-001
+      - type: inverts-uca
+        target: UCA-001
+      - type: prevents
+        target: H-001
+    fields:
+      constraint: >
+        The pagination controller must stop iteration when the page
+        index reaches the API maximum of 100 pages. This check must
+        occur before each page fetch, not after.
+
+  - id: CC-002
+    type: controller-constraint
+    title: Pagination must not stop on partial pages unless last page
+    status: accepted
+    description: >
+      The pagination controller must not use a partial page (fewer
+      results than page size) as the sole signal for end-of-results.
+      It must also check the maxErgebnisse value from the API response
+      to determine whether all results have been fetched.
+    tags: [stpa, pagination]
+    links:
+      - type: constrains-controller
+        target: CTRL-001
+      - type: inverts-uca
+        target: UCA-002
+      - type: prevents
+        target: H-001
+    fields:
+      constraint: >
+        The pagination controller must cross-reference partial page
+        size with the total result count (maxErgebnisse) before
+        deciding to stop. A partial page is only treated as the last
+        page when the accumulated result count equals or exceeds
+        maxErgebnisse.
+
+  - id: CC-003
+    type: controller-constraint
+    title: Retry must use exponential backoff with Retry-After
+    status: accepted
+    description: >
+      The retry controller must parse the Retry-After header from 429
+      responses and wait at least that long before retrying. When no
+      Retry-After header is present, exponential backoff must be used.
+      The maximum backoff delay must be capped and the total retry
+      count must be bounded.
+    tags: [stpa, retry, rate-limiting]
+    links:
+      - type: constrains-controller
+        target: CTRL-002
+      - type: inverts-uca
+        target: UCA-003
+      - type: prevents
+        target: H-003
+    fields:
+      constraint: >
+        The retry controller must respect Retry-After headers (both
+        delay-seconds and HTTP-date formats), fall back to exponential
+        backoff when the header is absent, cap maximum delay at 60
+        seconds, and limit total retries to the configured maximum
+        (default 3).
+
+  - id: CC-004
+    type: controller-constraint
+    title: Retry must classify transient errors as retryable
+    status: accepted
+    description: >
+      The retry controller must correctly classify transient errors
+      (network timeouts, HTTP 503 Service Unavailable, HTTP 504 Gateway
+      Timeout) as retryable and issue retry attempts for them. Only
+      permanent errors (4xx other than 429, deserialization failures)
+      should be propagated immediately to the caller.
+    tags: [stpa, retry, availability]
+    links:
+      - type: constrains-controller
+        target: CTRL-002
+      - type: inverts-uca
+        target: UCA-004
+      - type: prevents
+        target: H-001
+    fields:
+      constraint: >
+        The retry controller must retry on network timeouts, HTTP 503,
+        and HTTP 504 responses. These transient errors must not cause
+        pagination to abort. Only non-retryable errors (HTTP 400, 401,
+        403, 404, deserialization errors) should propagate immediately.
+
+  # ──────────────────────────────────────────────────
+  # Step 4 — Loss Scenarios
+  # ──────────────────────────────────────────────────
+
+  - id: LS-001
+    type: loss-scenario
+    title: API changes page limit, client requests invalid pages
+    status: accepted
+    description: >
+      The Bundesagentur fur Arbeit API reduces its maximum page limit
+      from 100 to a lower value (e.g., 50). The pagination controller's
+      process model still believes the limit is 100, so it continues
+      requesting pages beyond the new limit. The API returns errors or
+      empty results for these pages, but the controller does not adapt.
+      Meanwhile, the controller may also fail to recognize the new
+      boundary, leading to incomplete result sets.
+    tags: [stpa, pagination, api-change]
+    links:
+      - type: caused-by-uca
+        target: UCA-001
+      - type: leads-to-hazard
+        target: H-001
+    fields:
+      scenario-type: inadequate-process-model
+      causal-factors:
+        - "Hardcoded page limit of 100 in client code"
+        - "No runtime detection of API page limit changes"
+
+  - id: LS-002
+    type: loss-scenario
+    title: API adds new fields, deserialization silently drops data
+    status: accepted
+    description: >
+      The upstream API adds new required fields to its JSON response
+      (e.g., a new salary range format or application deadline field).
+      Because the library's response structs use #[serde(default)] and
+      do not use #[serde(deny_unknown_fields)], deserialization succeeds
+      without error. The new fields are silently ignored. Conversely, if
+      the API renames an existing field, the old field's value becomes
+      the default (empty string, None, etc.) with no warning to the
+      caller.
+    tags: [stpa, deserialization, api-change]
+    links:
+      - type: caused-by-uca
+        target: UCA-002
+      - type: leads-to-hazard
+        target: H-002
+    fields:
+      scenario-type: inadequate-feedback
+      causal-factors:
+        - "Use of serde default values for optional fields"
+        - "No deny_unknown_fields or catch-all mechanism"
+
+  - id: LS-003
+    type: loss-scenario
+    title: Non-standard Retry-After format causes aggressive fallback
+    status: accepted
+    description: >
+      The API returns a 429 response with a Retry-After header in a
+      non-standard format (e.g., milliseconds instead of seconds, or a
+      non-RFC 7231 date format). The httpdate parser fails, the numeric
+      parser fails, and the retry controller falls back to its default
+      exponential backoff which may start with a very short initial
+      delay. The rapid retries hit the API again immediately, triggering
+      further rate limiting or an escalation to a longer ban.
+    tags: [stpa, retry, rate-limiting, header-parsing]
+    links:
+      - type: caused-by-uca
+        target: UCA-003
+      - type: leads-to-hazard
+        target: H-003
+    fields:
+      scenario-type: inadequate-feedback
+      causal-factors:
+        - "httpdate parsing failure on non-standard format"
+        - "Fallback exponential backoff initial delay too short"
