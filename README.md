@@ -1,6 +1,6 @@
 # jobsuche
 
-[![Rust](https://img.shields.io/badge/rust-1.85%2B-blue.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/rust-1.89%2B-blue.svg)](https://www.rust-lang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/wunderfrucht/jobsuche/graph/badge.svg?token=riQYXs6xgb)](https://codecov.io/gh/wunderfrucht/jobsuche)
 
@@ -18,16 +18,29 @@ Access Germany's largest job database programmatically. Search for jobs, get det
 - ⚡ **Sync & Async**: Both synchronous and asynchronous clients
 - 🎯 **Based on gouqi**: Built with the same battle-tested patterns as [gouqi](https://github.com/wunderfrucht/gouqi)
 
+## What's New in 0.4.0
+
+- **Breaking:** `JobListing::beruf` and `JobDetails::arbeitgeber` are now `Option<String>` (the API can omit these fields). Update call sites:
+  ```rust
+  // Before (0.3.x)
+  println!("{}", job.beruf);
+  // After (0.4.0)
+  println!("{}", job.beruf.as_deref().unwrap_or("Unknown"));
+  ```
+- **API schema validation monitoring** via examples (`test_api_mapping`, `test_search_mapping`) to detect upstream field changes early
+- **reqwest 0.13** (HTTP client upgrade)
+- **MSRV raised to 1.89.0**
+
 ## Installation
 
 Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-jobsuche = "0.1"
+jobsuche = "0.4"
 
 # Optional: Enable async support
-jobsuche = { version = "0.1", features = ["async"] }
+jobsuche = { version = "0.4", features = ["async"] }
 ```
 
 ## Quick Start
@@ -57,7 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get details for the first job
     if let Some(job) = results.stellenangebote.first() {
-        println!("Job: {} at {}", job.beruf, job.arbeitgeber);
+        println!("Job: {} at {}", job.beruf.as_deref().unwrap_or("Unknown"), job.arbeitgeber);
         println!("Location: {}", job.arbeitsort.ort);
 
         // Fetch full details
@@ -106,7 +119,7 @@ for page in 1..=5 {
     )?;
 
     for job in results.stellenangebote {
-        println!("{}: {}", job.refnr, job.beruf);
+        println!("{}: {}", job.refnr, job.beruf.as_deref().unwrap_or("Unknown"));
     }
 }
 
@@ -129,8 +142,8 @@ let job_listing = /* ... from search results ... */;
 // Get comprehensive job information
 let details = client.job_details(&job_listing.refnr)?;
 
-println!("Title: {}", details.titel);
-println!("Employer: {}", details.arbeitgeber);
+println!("Title: {}", details.titel.as_deref().unwrap_or("Untitled"));
+println!("Employer: {}", details.arbeitgeber.as_deref().unwrap_or("Unknown"));
 println!("Locations: {:?}", details.arbeitsorte);
 println!("Work time models: {:?}", details.arbeitszeitmodelle);
 println!("Salary: {:?}", details.verguetung);
