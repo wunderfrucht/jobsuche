@@ -665,6 +665,11 @@ artifacts:
       exponential backoff which may start with a very short initial
       delay. The rapid retries hit the API again immediately, triggering
       further rate limiting or an escalation to a longer ban.
+
+      Mitigation (implemented): A tracing::warn! log is emitted when the
+      Retry-After header is present but unparseable, enabling operators
+      to detect and respond to non-standard header formats. The fallback
+      to exponential backoff remains as a safe default.
     tags: [stpa, retry, rate-limiting, header-parsing]
     links:
       - type: caused-by-uca
