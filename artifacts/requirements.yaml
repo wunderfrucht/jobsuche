@@ -1,0 +1,224 @@
+artifacts:
+  # ──────────────────────────────────────────────────
+  # Requirements
+  # ──────────────────────────────────────────────────
+
+  - id: REQ-001
+    type: requirement
+    title: Type-safe API client for Bundesagentur fur Arbeit job search API
+    status: accepted
+    description: >
+      The library shall provide a type-safe Rust client for the Bundesagentur
+      fur Arbeit (German Federal Employment Agency) Jobsuche REST API. All API
+      parameters, response types, and enums (Arbeitszeit, Befristung,
+      Angebotsart, etc.) shall be represented as strongly typed Rust constructs
+      so that invalid combinations are caught at compile time rather than at
+      runtime.
+    tags: [core, api]
+    fields:
+      priority: must
+      category: functional
+
+  - id: REQ-002
+    type: requirement
+    title: Support both synchronous and asynchronous HTTP clients
+    status: accepted
+    description: >
+      The library shall offer both a synchronous (blocking) client and an
+      asynchronous (async/await, tokio-based) client behind a feature flag.
+      The sync client uses reqwest::blocking, and the async client is gated
+      behind the "async" Cargo feature and requires a tokio runtime. Both
+      clients shall expose equivalent functionality for job search, job
+      details retrieval, and employer logo download.
+    tags: [core, async]
+    fields:
+      priority: must
+      category: functional
+
+  - id: REQ-003
+    type: requirement
+    title: Automatic pagination with lazy iteration
+    status: accepted
+    description: >
+      The library shall support automatic pagination over job search results.
+      For the synchronous client, a lazy Iterator (JobIterator) shall fetch
+      pages on demand with constant O(1) memory usage. For the async client,
+      a futures Stream shall yield individual job listings page-by-page.
+      Both shall respect the API limit of 100 pages maximum per query and
+      stop when results are exhausted or max_ergebnisse is reached.
+    tags: [core, pagination]
+    fields:
+      priority: must
+      category: functional
+
+  - id: REQ-004
+    type: requirement
+    title: Rate limit handling with Retry-After header support
+    status: accepted
+    description: >
+      The library shall detect HTTP 429 (Too Many Requests) responses and
+      automatically retry requests. When the server provides a Retry-After
+      header (either as delay-seconds or HTTP-date format), the client shall
+      respect the indicated wait time. When no Retry-After header is present,
+      the client shall fall back to exponential backoff. The maximum number
+      of retry attempts shall be configurable (default 3).
+    tags: [resilience, rate-limiting]
+    fields:
+      priority: must
+      category: non-functional
+
+  - id: REQ-005
+    type: requirement
+    title: Comprehensive error handling with typed errors
+    status: accepted
+    description: >
+      The library shall provide a comprehensive error enum (Error) using
+      thiserror, covering all failure modes including HTTP errors, IO errors,
+      serialization errors, API fault responses with status codes, unauthorized
+      access, forbidden/rate-limited responses, not-found (expired jobs),
+      URI parse errors, configuration errors, builder validation errors,
+      base64 decoding errors, and async middleware errors. Each variant shall
+      carry relevant context (e.g., retry_after seconds for RateLimited,
+      StatusCode and ApiErrors for Fault).
+    tags: [core, error-handling]
+    fields:
+      priority: must
+      category: functional
+
+  # ──────────────────────────────────────────────────
+  # Features
+  # ──────────────────────────────────────────────────
+
+  - id: FEAT-001
+    type: feature
+    title: Job search with builder pattern query construction
+    status: accepted
+    description: >
+      Provide a SearchOptionsBuilder that allows callers to construct job
+      search queries using a fluent builder pattern. Supported parameters
+      include was (job title), wo (location), umkreis (radius in km),
+      arbeitszeit (working time model), befristung (contract type),
+      angebotsart (offer type), arbeitgeber (employer, exact match),
+      berufsfeld (occupational field), veroeffentlichtseit (days since
+      publication), zeitarbeit (temp agencies), behinderung (disability
+      suitability), corona, page, and size. Values are capped to API limits
+      (size max 100, veroeffentlichtseit max 100). The builder serializes
+      to URL query parameters via url::form_urlencoded.
+    tags: [api, builder, search]
+    fields:
+      phase: phase-1
+      acceptance-criteria:
+        - Builder supports all documented API query parameters
+        - Enum parameters (Arbeitszeit, Befristung, Angebotsart) are type-safe
+        - Multiple values are semicolon-separated as required by the API
+        - Size and veroeffentlichtseit are capped to API limits
+        - SearchOptions can be round-tripped through as_builder()
+    links:
+      - type: satisfies
+        target: REQ-001
+
+  - id: FEAT-002
+    type: feature
+    title: Job details retrieval by reference number
+    status: accepted
+    description: >
+      Provide a job_details(refnr) method on both sync (Jobsuche) and async
+      (JobsucheAsync) clients that retrieves detailed information about a
+      specific job posting. The reference number is automatically base64-encoded
+      before being sent to the API endpoint (pc/v4/jobdetails/{encoded}).
+      Returns a strongly typed JobDetails struct. Also provides an
+      employer_logo(hash_id) method to download employer logo images as raw
+      PNG bytes.
+    tags: [api, details]
+    fields:
+      phase: phase-1
+      acceptance-criteria:
+        - Reference numbers are automatically base64-encoded for the API
+        - Returns strongly typed JobDetails with optional fields
+        - Expired jobs return Error::NotFound rather than panicking
+        - Employer logo download returns raw image bytes
+    links:
+      - type: satisfies
+        target: REQ-001
+
+  - id: FEAT-003
+    type: feature
+    title: Async client with tokio runtime
+    status: accepted
+    description: >
+      Provide JobsucheAsync, an asynchronous client gated behind the "async"
+      Cargo feature flag. It depends on tokio (rt, time, macros,
+      rt-multi-thread), futures, reqwest-middleware, reqwest-retry, and
+      async-stream. The async client wraps reqwest with retry middleware
+      (RetryTransientMiddleware with ExponentialBackoff) and exposes the same
+      API surface as the sync client (search, job_details, employer_logo)
+      using async fn and .await.
+    tags: [async, tokio]
+    fields:
+      phase: phase-1
+      acceptance-criteria:
+        - Client is only compiled when "async" feature is enabled
+        - Uses reqwest-middleware for automatic transient error retries
+        - Supports configurable timeouts and retry counts via ClientConfig
+        - Provides SearchAsync with list() and iter() async methods
+    links:
+      - type: satisfies
+        target: REQ-002
+
+  - id: FEAT-004
+    type: feature
+    title: Stream-based async pagination
+    status: accepted
+    description: >
+      Provide a stream() method on SearchAsync that returns a pinned boxed
+      Stream yielding Result<JobListing> items. The stream fetches pages
+      on demand, yielding individual jobs with constant O(1) memory usage.
+      The sync counterpart is the JobIterator which implements Iterator and
+      fetches pages lazily via fetch_next_page(). Both respect the 100-page
+      API limit and stop when fewer results than page size are returned or
+      max_ergebnisse is reached. An iter() convenience method collects all
+      stream/iterator results into a Vec.
+    tags: [pagination, async, streaming]
+    fields:
+      phase: phase-1
+      acceptance-criteria:
+        - Async stream yields individual jobs without loading all pages into memory
+        - Sync iterator implements std::iter::Iterator for idiomatic Rust usage
+        - Both stop at API limit of 100 pages maximum
+        - Both stop when partial page indicates end of results
+        - Both respect max_ergebnisse from the API response
+    links:
+      - type: satisfies
+        target: REQ-002
+      - type: satisfies
+        target: REQ-003
+
+  - id: FEAT-005
+    type: feature
+    title: Automatic retry with exponential backoff
+    status: accepted
+    description: >
+      The sync client implements retry logic using the backon crate with
+      ExponentialBuilder for configurable exponential backoff. Retryable
+      errors include HTTP transport errors, RateLimited (429), and server
+      errors (503 Service Unavailable, 504 Gateway Timeout). For 429
+      responses, the Retry-After header is parsed as either numeric seconds
+      or HTTP-date format (via httpdate crate) and respected. The async
+      client uses reqwest-retry middleware with its own ExponentialBackoff
+      policy. Retry is enabled by default with 3 max attempts and can be
+      disabled via ClientConfig.
+    tags: [resilience, retry, rate-limiting]
+    fields:
+      phase: phase-1
+      acceptance-criteria:
+        - Sync client retries on HTTP errors, 429, 503, and 504 responses
+        - Retry-After header parsed as numeric seconds or HTTP-date
+        - Exponential backoff used when no Retry-After header present
+        - Max delay capped at 60 seconds for sync client
+        - Retry can be disabled via ClientConfig.retry_enabled
+        - Async client uses reqwest-retry middleware for automatic retries
+    links:
+      - type: satisfies
+        target: REQ-004
+      - type: satisfies
+        target: REQ-005
