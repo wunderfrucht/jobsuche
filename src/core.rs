@@ -106,6 +106,11 @@ impl ClientCore {
 /// The Jobsuche API requires reference numbers to be base64-encoded when
 /// requesting job details. This is a known quirk of the API.
 ///
+/// Reference numbers are expected to contain only ASCII alphanumeric characters
+/// and hyphens (e.g., `10001-1001601666-S`). Inputs that are empty, longer than
+/// 50 characters, or contain unexpected characters will trigger a warning log
+/// but will still be encoded to avoid breaking existing callers.
+///
 /// # Example
 ///
 /// ```
@@ -117,6 +122,24 @@ impl ClientCore {
 /// ```
 pub fn encode_refnr(refnr: &str) -> String {
     use base64::{engine::general_purpose, Engine as _};
+
+    if refnr.is_empty() {
+        tracing::warn!("encode_refnr called with empty string");
+    } else if refnr.len() > 50 {
+        tracing::warn!(
+            "encode_refnr called with unusually long input ({} chars)",
+            refnr.len()
+        );
+    } else if !refnr
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || b == b'-')
+    {
+        tracing::warn!(
+            "encode_refnr called with non-standard characters: {:?}",
+            refnr
+        );
+    }
+
     general_purpose::STANDARD.encode(refnr.as_bytes())
 }
 
@@ -175,5 +198,33 @@ mod tests {
             debug_output.contains("REDACTED"),
             "Debug output should show REDACTED"
         );
+    }
+
+    #[test]
+    fn test_encode_refnr_valid_formats() {
+        let encoded = encode_refnr("10001-1001601666-S");
+        assert!(!encoded.is_empty());
+
+        let encoded = encode_refnr("10001-TEST123-S");
+        assert!(!encoded.is_empty());
+    }
+
+    #[test]
+    fn test_encode_refnr_empty() {
+        let encoded = encode_refnr("");
+        assert_eq!(encoded, "");
+    }
+
+    #[test]
+    fn test_encode_refnr_long_input() {
+        let long_input = "a".repeat(51);
+        let encoded = encode_refnr(&long_input);
+        assert!(!encoded.is_empty());
+    }
+
+    #[test]
+    fn test_encode_refnr_non_standard_chars() {
+        let encoded = encode_refnr("10001/1001601666@S");
+        assert!(!encoded.is_empty());
     }
 }
