@@ -124,7 +124,10 @@ fn chrono_now() -> String {
 /// Build a blocking reqwest client with the API key header.
 fn api_client() -> reqwest::blocking::Client {
     let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert("X-API-Key", reqwest::header::HeaderValue::from_static(API_KEY));
+    headers.insert(
+        "X-API-Key",
+        reqwest::header::HeaderValue::from_static(API_KEY),
+    );
     headers.insert(
         reqwest::header::ACCEPT,
         reqwest::header::HeaderValue::from_static("application/json"),
@@ -458,16 +461,19 @@ fn fetch_job_details(client: &reqwest::blocking::Client, refnr: &str) -> Option<
             }
         }
         Err(e) => {
-            eprintln!("Job details request for '{}' failed: {} — skipping", refnr, e);
+            eprintln!(
+                "Job details request for '{}' failed: {} — skipping",
+                refnr, e
+            );
             None
         }
     }
 }
 
+type SchemaList = Vec<BTreeMap<String, String>>;
+
 /// Collect search schemas (3 pages) and job-detail schemas (2 details) from the live API.
-fn collect_live_schemas(
-    client: &reqwest::blocking::Client,
-) -> (Vec<BTreeMap<String, String>>, Vec<BTreeMap<String, String>>) {
+fn collect_live_schemas(client: &reqwest::blocking::Client) -> (SchemaList, SchemaList) {
     let mut search_schemas = Vec::new();
     let mut detail_schemas = Vec::new();
 
@@ -688,7 +694,11 @@ fn api_schema_validate() {
         for change in &all_changes {
             println!(
                 "  [{}] {} — {}.{}: {}",
-                change.severity, change.change_type, change.endpoint, change.field_path, change.detail
+                change.severity,
+                change.change_type,
+                change.endpoint,
+                change.field_path,
+                change.detail
             );
         }
     }

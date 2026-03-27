@@ -27,10 +27,7 @@ fn main() {
             test_query, page
         );
 
-        let result = http_client
-            .get(&url)
-            .header("X-API-Key", api_key)
-            .send();
+        let result = http_client.get(&url).header("X-API-Key", api_key).send();
 
         match result {
             Ok(response) => {
@@ -38,7 +35,10 @@ fn main() {
                 let body: String = match response.text() {
                     Ok(b) => b,
                     Err(e) => {
-                        println!("Page {:>5}: HTTP {} | ERROR reading body: {}", page, status, e);
+                        println!(
+                            "Page {:>5}: HTTP {} | ERROR reading body: {}",
+                            page, status, e
+                        );
                         continue;
                     }
                 };
@@ -49,8 +49,8 @@ fn main() {
                             let max_ergebnisse = json.get("maxErgebnisse");
                             let returned_page = json.get("page");
                             let returned_size = json.get("size");
-                            let stellenangebote = json.get("stellenangebote")
-                                .and_then(|v| v.as_array());
+                            let stellenangebote =
+                                json.get("stellenangebote").and_then(|v| v.as_array());
                             let count = stellenangebote.map(|a| a.len()).unwrap_or(0);
                             let first_refnr = stellenangebote
                                 .and_then(|a| a.first())
@@ -69,12 +69,23 @@ fn main() {
                             );
                         }
                         Err(e) => {
-                            let preview = if body.len() > 200 { &body[..200] } else { &body };
-                            println!("Page {:>5}: HTTP {} | JSON parse error: {} | body preview: {}", page, status, e, preview);
+                            let preview = if body.len() > 200 {
+                                &body[..200]
+                            } else {
+                                &body
+                            };
+                            println!(
+                                "Page {:>5}: HTTP {} | JSON parse error: {} | body preview: {}",
+                                page, status, e, preview
+                            );
                         }
                     }
                 } else {
-                    let preview = if body.len() > 300 { &body[..300] } else { &body };
+                    let preview = if body.len() > 300 {
+                        &body[..300]
+                    } else {
+                        &body
+                    };
                     println!("Page {:>5}: HTTP {} | body: {}", page, status, preview);
                 }
             }

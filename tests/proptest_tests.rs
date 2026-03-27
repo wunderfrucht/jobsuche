@@ -27,25 +27,27 @@ fn arb_work_location() -> impl Strategy<Value = WorkLocation> {
 /// Strategy to generate an arbitrary JobListing with required and optional fields.
 fn arb_job_listing() -> impl Strategy<Value = JobListing> {
     (
-        "[a-zA-Z0-9-]{5,20}",   // refnr
-        "[a-zA-Z ]{3,30}",      // beruf
-        "[a-zA-Z ]{3,30}",      // arbeitgeber
+        "[a-zA-Z0-9-]{5,20}", // refnr
+        "[a-zA-Z ]{3,30}",    // beruf
+        "[a-zA-Z ]{3,30}",    // arbeitgeber
         arb_work_location(),
         proptest::option::of("[a-zA-Z ]{3,40}"), // titel
     )
-        .prop_map(|(refnr, beruf, arbeitgeber, arbeitsort, titel)| JobListing {
-            hash_id: None,
-            refnr,
-            beruf,
-            titel,
-            arbeitgeber,
-            aktuelle_veroeffentlichungsdatum: None,
-            eintrittsdatum: None,
-            arbeitsort,
-            modifikations_timestamp: None,
-            externe_url: None,
-            kundennummer_hash: None,
-        })
+        .prop_map(
+            |(refnr, beruf, arbeitgeber, arbeitsort, titel)| JobListing {
+                hash_id: None,
+                refnr,
+                beruf,
+                titel,
+                arbeitgeber,
+                aktuelle_veroeffentlichungsdatum: None,
+                eintrittsdatum: None,
+                arbeitsort,
+                modifikations_timestamp: None,
+                externe_url: None,
+                kundennummer_hash: None,
+            },
+        )
 }
 
 /// Strategy to generate an arbitrary JobSearchResponse.

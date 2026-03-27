@@ -33,6 +33,14 @@ repos:
         types: [rust]
         pass_filenames: false
 
+      - id: rivet-validate
+        name: rivet validate
+        description: Validate rivet artifacts
+        entry: rivet validate
+        language: system
+        files: '(artifacts/|rivet\.yaml)'
+        pass_filenames: false
+
       - id: cargo-doc
         name: cargo doc
         description: Build documentation

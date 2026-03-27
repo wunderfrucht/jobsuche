@@ -28,7 +28,7 @@ jobs:
       - name: Run integration tests against live API
         run: cargo test --all-features --test integration_test -- --ignored --test-threads=1
       - name: Run API contract tests
-        run: cargo test --all-features --test api_contract_tests -- --test-threads=1
+        run: cargo test --all-features --test api_contract_tests -- --ignored --test-threads=1
       - name: Run API schema validation
         id: schema-validation
         continue-on-error: true

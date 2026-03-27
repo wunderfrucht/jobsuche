@@ -3,7 +3,8 @@
 //!
 //! Run with: cargo test --test api_contract_tests -- --test-threads=1
 //!
-//! These tests are NOT #[ignore]d — they run in the scheduled CI workflow.
+//! These tests are #[ignore]d to avoid hitting the live API during local
+//! `cargo test`. The scheduled CI workflow runs them with `--ignored`.
 //! They use --test-threads=1 to avoid rate limiting.
 
 use jobsuche::{Credentials, Jobsuche, SearchOptions};
@@ -20,6 +21,7 @@ fn client() -> Jobsuche {
 
 /// Verify the search endpoint returns expected JSON structure
 #[test]
+#[ignore]
 fn api_contract_search_response_structure() {
     let client = client();
     let results = client
@@ -38,7 +40,10 @@ fn api_contract_search_response_structure() {
         results.max_ergebnisse.is_some(),
         "Response should include maxErgebnisse"
     );
-    assert!(results.page.is_some(), "Response should include page number");
+    assert!(
+        results.page.is_some(),
+        "Response should include page number"
+    );
     assert!(results.size.is_some(), "Response should include size");
 
     // Verify we got results (Informatik is a broad term)
@@ -58,6 +63,7 @@ fn api_contract_search_response_structure() {
 
 /// Verify pagination works: page 1 and page 2 return different results
 #[test]
+#[ignore]
 fn api_contract_pagination_works() {
     let client = client();
 
@@ -100,16 +106,12 @@ fn api_contract_pagination_works() {
 
 /// Verify the size parameter is respected
 #[test]
+#[ignore]
 fn api_contract_size_parameter_respected() {
     let client = client();
     let results = client
         .search()
-        .list(
-            SearchOptions::builder()
-                .was("Ingenieur")
-                .size(3)
-                .build(),
-        )
+        .list(SearchOptions::builder().was("Ingenieur").size(3).build())
         .expect("Search should work");
 
     assert!(
@@ -121,16 +123,12 @@ fn api_contract_size_parameter_respected() {
 
 /// Verify the API returns max_ergebnisse for broad searches
 #[test]
+#[ignore]
 fn api_contract_max_ergebnisse_reported() {
     let client = client();
     let results = client
         .search()
-        .list(
-            SearchOptions::builder()
-                .was("Informatik")
-                .size(1)
-                .build(),
-        )
+        .list(SearchOptions::builder().was("Informatik").size(1).build())
         .expect("Search should work");
 
     let max = results
@@ -142,6 +140,7 @@ fn api_contract_max_ergebnisse_reported() {
 
 /// Verify page beyond limit returns empty or error gracefully
 #[test]
+#[ignore]
 fn api_contract_page_beyond_limit() {
     let client = client();
 
@@ -175,6 +174,7 @@ fn api_contract_page_beyond_limit() {
 
 /// Verify job details endpoint works for a freshly-found job
 #[test]
+#[ignore]
 fn api_contract_job_details_structure() {
     let client = client();
 
@@ -213,6 +213,7 @@ fn api_contract_job_details_structure() {
 
 /// Verify location filter narrows results
 #[test]
+#[ignore]
 fn api_contract_location_filter() {
     let client = client();
 
@@ -242,7 +243,8 @@ fn api_contract_location_filter() {
         assert!(
             narrow_max <= broad_max,
             "Location filter should narrow results: broad={}, narrow={}",
-            broad_max, narrow_max
+            broad_max,
+            narrow_max
         );
         println!(
             "Broad: {} results, Flensburg 10km: {} results",
