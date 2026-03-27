@@ -2,12 +2,13 @@
 //!
 //! This module provides an async/await interface for non-blocking API calls.
 
+use std::time::Duration;
+
 use tracing::{debug, warn};
 
+use backon::{BackoffBuilder, ExponentialBuilder};
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::{Client, Method, StatusCode};
-use reqwest_middleware::{ClientBuilder as MiddlewareClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::de::DeserializeOwned;
 
 use crate::core::{encode_refnr, ClientCore};
@@ -48,8 +49,7 @@ use crate::{ApiErrors, Credentials, Error, JobDetails, Result};
 #[derive(Clone, Debug)]
 pub struct JobsucheAsync {
     pub(crate) core: ClientCore,
-    client: ClientWithMiddleware,
-    #[allow(dead_code)]
+    client: Client,
     config: ClientConfig,
 }
 
@@ -116,23 +116,10 @@ impl JobsucheAsync {
     {
         let core = ClientCore::new(host, credentials)?;
 
-        // Build base reqwest client with timeouts
-        let reqwest_client = Client::builder()
+        let client = Client::builder()
             .timeout(config.timeout)
             .connect_timeout(config.connect_timeout)
             .build()?;
-
-        // Wrap with retry middleware if enabled
-        let client = if config.retry_enabled {
-            let retry_policy =
-                ExponentialBackoff::builder().build_with_max_retries(config.max_retries);
-
-            MiddlewareClientBuilder::new(reqwest_client)
-                .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-                .build()
-        } else {
-            MiddlewareClientBuilder::new(reqwest_client).build()
-        };
 
         Ok(JobsucheAsync {
             core,
@@ -151,21 +138,10 @@ impl JobsucheAsync {
         core: ClientCore,
         config: ClientConfig,
     ) -> Result<JobsucheAsync> {
-        let reqwest_client = Client::builder()
+        let client = Client::builder()
             .timeout(config.timeout)
             .connect_timeout(config.connect_timeout)
             .build()?;
-
-        let client = if config.retry_enabled {
-            let retry_policy =
-                ExponentialBackoff::builder().build_with_max_retries(config.max_retries);
-
-            MiddlewareClientBuilder::new(reqwest_client)
-                .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-                .build()
-        } else {
-            MiddlewareClientBuilder::new(reqwest_client).build()
-        };
 
         Ok(JobsucheAsync {
             core,
@@ -255,8 +231,82 @@ impl JobsucheAsync {
         Ok(bytes)
     }
 
-    /// Internal method to perform async GET requests
+    /// Internal method to perform async GET requests with retry logic
+    ///
+    /// This mirrors the sync client's retry approach: when a 429 response includes
+    /// a `Retry-After` header, the client sleeps for the specified duration before
+    /// retrying. For other transient errors (5xx, timeouts), exponential backoff is
+    /// used instead.
     pub(crate) async fn get<T>(&self, path: &str) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        if !self.config.retry_enabled {
+            return self.get_once(path).await;
+        }
+
+        // Build exponential backoff strategy
+        let backoff = ExponentialBuilder::default()
+            .with_max_times(self.config.max_retries as usize)
+            .with_max_delay(Duration::from_secs(60));
+
+        let mut attempt = 0;
+        let mut backoff_iter = backoff.build();
+
+        loop {
+            attempt += 1;
+            debug!(
+                "GET {} (async, attempt {}/{})",
+                path,
+                attempt,
+                self.config.max_retries + 1
+            );
+
+            match self.get_once(path).await {
+                Ok(result) => return Ok(result),
+                Err(e) => {
+                    // Check if error is retryable
+                    let should_retry = matches!(
+                        e,
+                        Error::Http(_)
+                            | Error::RateLimited { .. }
+                            | Error::Fault {
+                                code: StatusCode::SERVICE_UNAVAILABLE | StatusCode::GATEWAY_TIMEOUT,
+                                ..
+                            }
+                    );
+
+                    if !should_retry || attempt > self.config.max_retries {
+                        return Err(e);
+                    }
+
+                    // Handle rate limiting with Retry-After
+                    if let Error::RateLimited {
+                        retry_after: Some(seconds),
+                    } = e
+                    {
+                        let duration = Duration::from_secs(seconds);
+                        warn!(
+                            "Rate limited, waiting {} seconds as requested by server (attempt {}/{})",
+                            seconds, attempt, self.config.max_retries
+                        );
+                        tokio::time::sleep(duration).await;
+                    } else if let Some(duration) = backoff_iter.next() {
+                        warn!(
+                            "Request failed ({}), retrying in {:?}... (attempt {}/{})",
+                            e, duration, attempt, self.config.max_retries
+                        );
+                        tokio::time::sleep(duration).await;
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Perform a single async GET request without retry
+    async fn get_once<T>(&self, path: &str) -> Result<T>
     where
         T: DeserializeOwned,
     {
@@ -267,8 +317,6 @@ impl JobsucheAsync {
         );
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
-
-        debug!("GET {} (async)", path);
 
         let response = self
             .client
@@ -289,12 +337,6 @@ impl JobsucheAsync {
     }
 
     /// Convert HTTP status and response into an appropriate Error (async)
-    ///
-    /// Note: The async client uses `reqwest-retry` middleware for automatic retries of
-    /// transient errors. However, the middleware does not honour the `Retry-After` header
-    /// when scheduling retries — it uses its own exponential backoff policy instead.
-    /// The `Retry-After` value is still parsed here and surfaced in `Error::RateLimited`
-    /// so callers can implement their own delay logic if needed.
     async fn error_from_status(&self, status: StatusCode, response: reqwest::Response) -> Error {
         match status {
             StatusCode::UNAUTHORIZED => Error::Unauthorized,

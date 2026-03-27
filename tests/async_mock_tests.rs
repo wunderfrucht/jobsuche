@@ -253,7 +253,13 @@ async fn test_async_rate_limit_429_with_retry_after() {
         .create_async()
         .await;
 
-    let client = JobsucheAsync::new(server.url(), Credentials::default())
+    // Disable retries so we only test error parsing (not the 120s sleep)
+    let config = ClientConfig {
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = JobsucheAsync::with_config(server.url(), Credentials::default(), config)
         .await
         .unwrap();
 
@@ -278,7 +284,13 @@ async fn test_async_rate_limit_429_without_retry_after() {
         .create_async()
         .await;
 
-    let client = JobsucheAsync::new(server.url(), Credentials::default())
+    // Disable retries so we only test error parsing
+    let config = ClientConfig {
+        retry_enabled: false,
+        ..Default::default()
+    };
+
+    let client = JobsucheAsync::with_config(server.url(), Credentials::default(), config)
         .await
         .unwrap();
 
@@ -550,4 +562,69 @@ async fn test_async_pagination_mock() {
         .unwrap();
     assert_eq!(results_page2.stellenangebote.len(), 1);
     assert_eq!(results_page2.stellenangebote[0].refnr, "REF2");
+}
+
+/// Verify that the async client respects Retry-After headers during retries.
+///
+/// The mock returns 429 with Retry-After: 1 on the first request, then 200 on the
+/// second. The test asserts that the total elapsed time is at least 1 second,
+/// confirming that the client actually slept for the server-requested duration.
+#[tokio::test]
+async fn test_async_retry_respects_retry_after_header() {
+    let mut server = Server::new_async().await;
+
+    let success_response = r#"{
+        "referenznummer": "10001-RETRY-TEST-S",
+        "stellenangebotsTitel": "Retry Test Job",
+        "firma": "Retry Corp",
+        "stellenangebotsBeschreibung": "Testing retry-after behaviour",
+        "hauptberuf": "Tester",
+        "stellenlokationen": [],
+        "verguetungsangabe": "KEINE_ANGABEN"
+    }"#;
+
+    // First request returns 429 with Retry-After: 1
+    let _m_rate_limit = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(429)
+        .with_header("Retry-After", "1")
+        .expect(1)
+        .create_async()
+        .await;
+
+    // Second request returns 200 with the job details
+    let _m_success = server
+        .mock("GET", mockito::Matcher::Any)
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(success_response)
+        .expect(1)
+        .create_async()
+        .await;
+
+    let config = ClientConfig {
+        max_retries: 3,
+        retry_enabled: true,
+        ..Default::default()
+    };
+
+    let client = JobsucheAsync::with_config(server.url(), Credentials::default(), config)
+        .await
+        .unwrap();
+
+    let start = std::time::Instant::now();
+    let result = client.job_details("10001-RETRY-TEST-S").await;
+    let elapsed = start.elapsed();
+
+    // The request should succeed after the retry
+    let job = result.expect("Expected successful response after retry");
+    assert_eq!(job.refnr, Some("10001-RETRY-TEST-S".to_string()));
+    assert_eq!(job.titel, Some("Retry Test Job".to_string()));
+
+    // Verify the client actually waited at least 1 second (the Retry-After value)
+    assert!(
+        elapsed >= Duration::from_secs(1),
+        "Expected at least 1 second delay for Retry-After, but only waited {:?}",
+        elapsed
+    );
 }
