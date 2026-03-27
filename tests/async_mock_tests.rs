@@ -52,7 +52,10 @@ async fn test_async_search_with_mock() {
 
     assert_eq!(results.stellenangebote.len(), 1);
     assert_eq!(results.stellenangebote[0].refnr, "10001-ASYNC-TEST-S");
-    assert_eq!(results.stellenangebote[0].beruf, "Async Rust Developer");
+    assert_eq!(
+        results.stellenangebote[0].beruf,
+        Some("Async Rust Developer".to_string())
+    );
 }
 
 #[tokio::test]

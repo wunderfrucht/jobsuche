@@ -32,7 +32,7 @@ use crate::{JobListing, Result, SearchOptions};
 /// // Process jobs one at a time without loading all into memory
 /// for job in client.search().jobs(options).unwrap() {
 ///     match job {
-///         Ok(job) => println!("Found: {}", job.beruf),
+///         Ok(job) => println!("Found: {}", job.beruf.as_deref().unwrap_or("Unknown")),
 ///         Err(e) => eprintln!("Error: {}", e),
 ///     }
 /// }

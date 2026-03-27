@@ -27,9 +27,9 @@ fn arb_work_location() -> impl Strategy<Value = WorkLocation> {
 /// Strategy to generate an arbitrary JobListing with required and optional fields.
 fn arb_job_listing() -> impl Strategy<Value = JobListing> {
     (
-        "[a-zA-Z0-9-]{5,20}", // refnr
-        "[a-zA-Z ]{3,30}",    // beruf
-        "[a-zA-Z ]{3,30}",    // arbeitgeber
+        "[a-zA-Z0-9-]{5,20}",                    // refnr
+        proptest::option::of("[a-zA-Z ]{3,30}"), // beruf
+        "[a-zA-Z ]{3,30}",                       // arbeitgeber
         arb_work_location(),
         proptest::option::of("[a-zA-Z ]{3,40}"), // titel
     )

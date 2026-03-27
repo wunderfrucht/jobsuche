@@ -41,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!(
                     "{}. {} at {} ({})",
                     count,
-                    job.beruf,
+                    job.beruf.as_deref().unwrap_or("Unknown"),
                     job.arbeitgeber,
                     job.arbeitsort.ort.as_deref().unwrap_or("unknown")
                 );
@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(result) = stream.next().await {
         if let Ok(job) = result {
             count += 1;
-            println!("{}. {}", count, job.beruf);
+            println!("{}. {}", count, job.beruf.as_deref().unwrap_or("Unknown"));
         }
     }
 
@@ -85,7 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .stream(options)
         .filter(|result| {
             // Filter for jobs containing "Senior"
-            futures::future::ready(matches!(result, Ok(job) if job.beruf.contains("Senior")))
+            futures::future::ready(matches!(result, Ok(job) if job.beruf.as_deref().is_some_and(|b| b.contains("Senior"))))
         })
         .take(10); // Only take first 10 senior positions
 
@@ -93,7 +93,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(result) = senior_jobs.next().await {
         if let Ok(job) = result {
             count += 1;
-            println!("{}. {} at {}", count, job.beruf, job.arbeitgeber);
+            println!(
+                "{}. {} at {}",
+                count,
+                job.beruf.as_deref().unwrap_or("Unknown"),
+                job.arbeitgeber
+            );
         }
     }
 
@@ -142,7 +147,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Collected {} jobs", jobs.len());
     for (i, job) in jobs.iter().take(5).enumerate() {
-        println!("  {}. {}", i + 1, job.beruf);
+        println!("  {}. {}", i + 1, job.beruf.as_deref().unwrap_or("Unknown"));
     }
     if jobs.len() > 5 {
         println!("  ... and {} more", jobs.len() - 5);

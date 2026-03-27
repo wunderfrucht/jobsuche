@@ -66,8 +66,14 @@ fn test_search_with_mock() {
 
     assert_eq!(results.stellenangebote.len(), 2);
     assert_eq!(results.stellenangebote[0].refnr, "10001-TEST123-S");
-    assert_eq!(results.stellenangebote[0].beruf, "Rust Developer");
-    assert_eq!(results.stellenangebote[1].beruf, "Senior Rust Engineer");
+    assert_eq!(
+        results.stellenangebote[0].beruf,
+        Some("Rust Developer".to_string())
+    );
+    assert_eq!(
+        results.stellenangebote[1].beruf,
+        Some("Senior Rust Engineer".to_string())
+    );
 }
 
 #[test]
@@ -114,7 +120,10 @@ fn test_search_with_filters_mock() {
         .unwrap();
 
     assert_eq!(results.stellenangebote.len(), 1);
-    assert_eq!(results.stellenangebote[0].beruf, "Backend Developer");
+    assert_eq!(
+        results.stellenangebote[0].beruf,
+        Some("Backend Developer".to_string())
+    );
 }
 
 #[test]

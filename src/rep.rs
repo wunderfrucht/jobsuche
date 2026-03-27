@@ -28,8 +28,9 @@ pub struct JobListing {
     pub hash_id: Option<String>,
     /// Reference number (use this for job details)
     pub refnr: String,
-    /// Job title/profession
-    pub beruf: String,
+    /// Job title/profession (may be missing for some listings)
+    #[serde(default)]
+    pub beruf: Option<String>,
     /// Job listing title
     #[serde(default)]
     pub titel: Option<String>,
@@ -368,7 +369,7 @@ mod tests {
 
         let listing: JobListing = serde_json::from_str(json).unwrap();
         assert_eq!(listing.refnr, "10001-1234567-S");
-        assert_eq!(listing.beruf, "Rust Developer");
+        assert_eq!(listing.beruf, Some("Rust Developer".to_string()));
         assert_eq!(listing.arbeitgeber, "Awesome Company");
         assert_eq!(
             listing.aktuelle_veroeffentlichungsdatum,
@@ -536,7 +537,7 @@ mod tests {
         let listing = JobListing {
             hash_id: Some("hash123".to_string()),
             refnr: "10001-TEST-S".to_string(),
-            beruf: "Developer".to_string(),
+            beruf: Some("Developer".to_string()),
             titel: Some("Senior Developer".to_string()),
             arbeitgeber: "Company".to_string(),
             aktuelle_veroeffentlichungsdatum: Some("2025-10-21".to_string()),

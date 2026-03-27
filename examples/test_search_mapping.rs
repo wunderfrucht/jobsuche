@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (i, job) in results.stellenangebote.iter().enumerate() {
         println!("Job {}:", i + 1);
         println!("  refnr: {}", job.refnr);
-        println!("  beruf: {}", job.beruf);
+        println!("  beruf: {}", job.beruf.as_deref().unwrap_or("Unknown"));
         println!("  titel: {:?}", job.titel);
         println!("  arbeitgeber: {}", job.arbeitgeber);
         println!(

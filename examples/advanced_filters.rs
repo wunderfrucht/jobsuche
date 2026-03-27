@@ -39,7 +39,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     for job in results.stellenangebote.iter().take(10) {
-        println!("• {} - {}", job.beruf, job.arbeitgeber);
+        println!(
+            "• {} - {}",
+            job.beruf.as_deref().unwrap_or("Unknown"),
+            job.arbeitgeber
+        );
         println!(
             "  📍 {}, {} ({}km away)",
             job.arbeitsort.ort.as_deref().unwrap_or("unknown"),

@@ -55,7 +55,10 @@ fn api_contract_search_response_structure() {
     // Verify job listing structure
     let job = &results.stellenangebote[0];
     assert!(!job.refnr.is_empty(), "Job must have refnr");
-    assert!(!job.beruf.is_empty(), "Job must have beruf");
+    assert!(
+        job.beruf.as_ref().is_some_and(|b| !b.is_empty()),
+        "Job must have beruf"
+    );
     assert!(!job.arbeitgeber.is_empty(), "Job must have arbeitgeber");
     // WorkLocation must be present (required field)
     // Optional fields may or may not be present

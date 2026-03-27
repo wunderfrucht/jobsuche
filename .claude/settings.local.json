@@ -41,7 +41,16 @@
       "Bash(pre-commit install:*)",
       "Bash(git config:*)",
       "Bash(rustup run:*)",
-      "Bash(pre-commit run:*)"
+      "Bash(pre-commit run:*)",
+      "Bash(cargo install:*)",
+      "Bash(rustup toolchain:*)",
+      "Bash(rustup install:*)",
+      "Bash(rustup component:*)",
+      "Bash(cargo tree:*)",
+      "Bash(gh run:*)",
+      "Bash(cargo deny:*)",
+      "Bash(gh workflow:*)",
+      "Bash(cargo clippy:*)"
     ],
     "deny": [],
     "ask": []

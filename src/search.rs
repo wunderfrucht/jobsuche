@@ -57,7 +57,7 @@ impl Search {
     ///
     /// println!("Found {} jobs", results.stellenangebote.len());
     /// for job in &results.stellenangebote {
-    ///     println!("- {}: {}", job.refnr, job.beruf);
+    ///     println!("- {}: {}", job.refnr, job.beruf.as_deref().unwrap_or("Unknown"));
     /// }
     /// ```
     pub fn list(&self, options: SearchOptions) -> Result<JobSearchResponse> {
@@ -135,7 +135,7 @@ impl Search {
     /// // Process jobs one at a time - constant memory usage!
     /// for job in client.search().jobs(options).unwrap() {
     ///     match job {
-    ///         Ok(job) => println!("Found: {}", job.beruf),
+    ///         Ok(job) => println!("Found: {}", job.beruf.as_deref().unwrap_or("Unknown")),
     ///         Err(e) => eprintln!("Error: {}", e),
     ///     }
     /// }
@@ -316,7 +316,7 @@ impl SearchAsync {
     ///
     ///     while let Some(result) = stream.next().await {
     ///         match result {
-    ///             Ok(job) => println!("Found: {}", job.beruf),
+    ///             Ok(job) => println!("Found: {}", job.beruf.as_deref().unwrap_or("Unknown")),
     ///             Err(e) => eprintln!("Error: {}", e),
     ///         }
     ///     }
@@ -343,7 +343,7 @@ impl SearchAsync {
     ///     .filter(|result| {
     ///         // Filter senior positions
     ///         futures::future::ready(
-    ///             matches!(result, Ok(job) if job.beruf.contains("Senior"))
+    ///             matches!(result, Ok(job) if job.beruf.as_deref().is_some_and(|b| b.contains("Senior")))
     ///         )
     ///     })
     ///     .take(50); // Only take first 50 matches

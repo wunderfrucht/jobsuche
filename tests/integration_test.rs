@@ -45,10 +45,14 @@ fn test_real_api_search() {
     if let Some(first_job) = results.stellenangebote.first() {
         println!(
             "First job: {} at {}",
-            first_job.beruf, first_job.arbeitgeber
+            first_job.beruf.as_deref().unwrap_or("Unknown"),
+            first_job.arbeitgeber
         );
         assert!(!first_job.refnr.is_empty(), "Job should have refnr");
-        assert!(!first_job.beruf.is_empty(), "Job should have beruf");
+        assert!(
+            first_job.beruf.as_ref().is_some_and(|b| !b.is_empty()),
+            "Job should have beruf"
+        );
         assert!(
             !first_job.arbeitgeber.is_empty(),
             "Job should have arbeitgeber"
@@ -191,7 +195,7 @@ fn test_real_api_filters() {
     for job in &results.stellenangebote {
         println!(
             "Job: {} in {}, {}",
-            job.beruf,
+            job.beruf.as_deref().unwrap_or("Unknown"),
             job.arbeitsort.ort.as_deref().unwrap_or("unknown"),
             job.arbeitsort.region.as_deref().unwrap_or("unknown")
         );
