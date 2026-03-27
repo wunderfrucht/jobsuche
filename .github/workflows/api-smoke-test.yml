@@ -6,6 +6,9 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
+permissions:
+  issues: write
+
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
@@ -26,3 +29,129 @@ jobs:
         run: cargo test --all-features --test integration_test -- --ignored --test-threads=1
       - name: Run API contract tests
         run: cargo test --all-features --test api_contract_tests -- --test-threads=1
+      - name: Run API schema validation
+        id: schema-validation
+        continue-on-error: true
+        run: cargo test --all-features --test api_schema_validation -- --ignored --test-threads=1
+      - name: Alert on API schema changes
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'tests/fixtures/schema-diff-report.json';
+
+            if (!fs.existsSync(reportPath)) {
+              console.log('No schema diff report found — skipping alerting.');
+              return;
+            }
+
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+
+            if (!report.changes || report.changes.length === 0) {
+              console.log('No schema changes detected — nothing to report.');
+              return;
+            }
+
+            // Ensure labels exist
+            const labelDefs = [
+              { name: 'api-schema-change', color: '1d76db', description: 'API schema change detected' },
+              { name: 'severity:critical', color: 'd93f0b', description: 'Critical severity' },
+              { name: 'severity:warning', color: 'fbca04', description: 'Warning severity' },
+              { name: 'severity:informational', color: '0e8a16', description: 'Informational severity' },
+            ];
+            for (const def of labelDefs) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: def.name,
+                });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: def.name,
+                    color: def.color,
+                    description: def.description,
+                  });
+                  console.log(`Created label: ${def.name}`);
+                }
+              }
+            }
+
+            const severityIcon = { critical: '🔴', warning: '🟡', informational: '🟢' };
+
+            for (const change of report.changes) {
+              const icon = severityIcon[change.severity] || '⚪';
+              const title = `${icon} API ${change.change_type}: ${change.endpoint}.${change.field_path}`;
+              const labels = ['api-schema-change', `severity:${change.severity}`];
+              const fingerprint = change.fingerprint;
+
+              // Search for existing open issue with same fingerprint
+              const existing = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: 'api-schema-change',
+                per_page: 100,
+              });
+
+              const duplicate = existing.data.find(issue =>
+                issue.body && issue.body.includes(fingerprint)
+              );
+
+              if (duplicate) {
+                console.log(`Skipping duplicate issue for fingerprint: ${fingerprint} (issue #${duplicate.number})`);
+                continue;
+              }
+
+              const body = [
+                '## API Schema Change Detected',
+                '',
+                '| Property | Value |',
+                '|----------|-------|',
+                `| **Endpoint** | \`${change.endpoint}\` |`,
+                `| **Field** | \`${change.field_path}\` |`,
+                `| **Change type** | ${change.change_type} |`,
+                `| **Severity** | ${change.severity} |`,
+                `| **Old type** | ${change.old_type || 'N/A'} |`,
+                `| **New type** | ${change.new_type || 'N/A'} |`,
+                '',
+                '### Detail',
+                '',
+                change.detail,
+                '',
+                '### Action Required',
+                '',
+                change.severity === 'critical'
+                  ? 'This is a **critical** change that may break deserialization. Investigate immediately and update Rust types if needed.'
+                  : change.severity === 'warning'
+                    ? 'This is a **warning** — the field may have changed optionality. Review whether Rust types need updating.'
+                    : 'This is **informational** — a new field was detected. Consider adding it to the Rust types.',
+                '',
+                '### How to Update Baseline',
+                '',
+                '```bash',
+                'UPDATE_BASELINE=1 cargo test --all-features --test api_schema_validation -- --ignored --test-threads=1',
+                'git add tests/fixtures/api-schema-baseline.json',
+                'git commit -m "chore: update API schema baseline"',
+                '```',
+                '',
+                '---',
+                `Fingerprint: \`${fingerprint}\``,
+              ].join('\n');
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: labels,
+              });
+
+              console.log(`Created issue: ${title}`);
+            }
+
+            console.log(`Processed ${report.changes.length} changes (critical: ${report.critical_count}, warning: ${report.warning_count}, informational: ${report.informational_count})`);
