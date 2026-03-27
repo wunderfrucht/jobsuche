@@ -1,0 +1,620 @@
+openapi: 3.0.3
+info:
+  title: Bundesagentur für Arbeit - Jobsuche API
+  version: "4"
+  description: |
+    Community-maintained OpenAPI specification for the Bundesagentur für Arbeit
+    (Federal Employment Agency of Germany) Jobsuche API, derived from live API
+    observations.
+
+    This spec is not officially published by the Bundesagentur für Arbeit. It was
+    reverse-engineered from actual API responses and may be incomplete or become
+    outdated as the upstream API evolves.
+
+    **Authentication:** All endpoints require an `X-API-Key` header. The public
+    API key is `jobboerse-jobsuche`.
+
+    **Known behavioural notes:**
+    - `beruf` and `arbeitgeber` fields in search results were historically always
+      present but as of March 2026 may be omitted by the API.
+    - The `veroeffentlichtseit` query parameter may not work correctly due to an
+      upstream API bug (see bundesAPI/jobsuche-api#34).
+    - Employer logo requests frequently return 404 because many employers do not
+      upload logos.
+  contact:
+    name: bundesAPI community
+    url: https://github.com/bundesAPI/jobsuche-api
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://rest.arbeitsagentur.de/jobboerse/jobsuche-service
+    description: Production server
+
+security:
+  - apiKey: []
+
+paths:
+  /pc/v4/jobs:
+    get:
+      operationId: searchJobs
+      summary: Search for job listings
+      description: |
+        Full-text search across job listings with various filters. Returns
+        paginated results together with facet counts for further filtering.
+      parameters:
+        - name: was
+          in: query
+          description: Free-text search term for job title / keywords.
+          schema:
+            type: string
+          example: Softwareentwickler
+        - name: wo
+          in: query
+          description: Free-text location (city, postal code, or region).
+          schema:
+            type: string
+          example: Berlin
+        - name: berufsfeld
+          in: query
+          description: Occupational field filter.
+          schema:
+            type: string
+          example: Informatik
+        - name: arbeitgeber
+          in: query
+          description: |
+            Employer name filter. Case-sensitive exact match only.
+          schema:
+            type: string
+          example: Deutsche Bahn AG
+        - name: page
+          in: query
+          description: Page number for pagination (starts at 0).
+          schema:
+            type: integer
+            minimum: 0
+          example: 0
+        - name: size
+          in: query
+          description: Number of results per page (max 100).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+          example: 25
+        - name: umkreis
+          in: query
+          description: Search radius in kilometres from the `wo` location.
+          schema:
+            type: integer
+            minimum: 0
+          example: 50
+        - name: angebotsart
+          in: query
+          description: |
+            Employment type filter.
+            - `1` = Regular employment (Arbeit)
+            - `2` = Self-employment (Selbstaendigkeit)
+            - `4` = Apprenticeship / Dual study (Ausbildung)
+            - `34` = Internship / Trainee (Praktikum/Trainee)
+          schema:
+            type: integer
+            enum: [1, 2, 4, 34]
+          example: 1
+        - name: befristung
+          in: query
+          description: |
+            Contract type filter. Multiple values separated by semicolons.
+            - `1` = Fixed-term (befristet)
+            - `2` = Permanent (unbefristet)
+          schema:
+            type: string
+          example: "2"
+        - name: arbeitszeit
+          in: query
+          description: |
+            Working time model filter. Multiple values separated by semicolons.
+            - `vz` = Full-time (Vollzeit)
+            - `tz` = Part-time (Teilzeit)
+            - `snw` = Shift / night / weekend (Schicht/Nachtarbeit/Wochenende)
+            - `ho` = Home office / remote (Heim-/Telearbeit)
+            - `mj` = Mini job (Minijob)
+          schema:
+            type: string
+          example: vz
+        - name: veroeffentlichtseit
+          in: query
+          description: |
+            Only return jobs published within the last N days (0-100).
+            **Warning:** This parameter may be ignored due to an upstream API bug.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+          example: 7
+        - name: zeitarbeit
+          in: query
+          description: Include temporary employment agency listings (default true).
+          schema:
+            type: boolean
+          example: false
+        - name: behinderung
+          in: query
+          description: Filter for jobs suitable for people with disabilities.
+          schema:
+            type: boolean
+          example: true
+        - name: corona
+          in: query
+          description: Filter for Corona/COVID-19 related job offers.
+          schema:
+            type: boolean
+          example: false
+      responses:
+        "200":
+          description: Successful search response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobSearchResponse"
+        "400":
+          description: Bad request - invalid or missing query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limited - too many requests.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /pc/v4/jobdetails/{refnr}:
+    get:
+      operationId: getJobDetails
+      summary: Get details for a single job listing
+      description: |
+        Returns the full details for a single job identified by its reference
+        number. The `refnr` path parameter must be Base64-encoded.
+      parameters:
+        - name: refnr
+          in: path
+          required: true
+          description: |
+            Base64-encoded reference number of the job listing
+            (e.g. the `refnr` value from search results, Base64-encoded).
+          schema:
+            type: string
+          example: MTAwMDEtMTIzNDU2Ny1T
+      responses:
+        "200":
+          description: Successful job details response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDetails"
+        "400":
+          description: Bad request - invalid reference number format.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Job listing not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limited - too many requests.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /ed/v1/arbeitgeberlogo/{hashId}:
+    get:
+      operationId: getEmployerLogo
+      summary: Get an employer's logo image
+      description: |
+        Returns the logo image for the employer identified by `hashId`. The hash
+        is available via the `kundennummerHash` field in search results or the
+        `arbeitgeberKundennummerHash` field in job details.
+
+        Many employers do not have logos; expect 404 responses frequently.
+      parameters:
+        - name: hashId
+          in: path
+          required: true
+          description: Employer hash ID (from `kundennummerHash` or `arbeitgeberKundennummerHash`).
+          schema:
+            type: string
+          example: VK2qoXBe0s-UAdH_qxLDRrZrY5iY8a1PJt3MjJCXsdo=
+      responses:
+        "200":
+          description: Employer logo image.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: No logo available for this employer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limited - too many requests.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key sent via the `X-API-Key` header. The public key is
+        `jobboerse-jobsuche`.
+
+  schemas:
+    # ── Search endpoint ────────────────────────────────────────────────
+
+    JobSearchResponse:
+      type: object
+      required:
+        - stellenangebote
+      properties:
+        stellenangebote:
+          type: array
+          description: List of matching job listings.
+          items:
+            $ref: "#/components/schemas/JobListing"
+        maxErgebnisse:
+          type: integer
+          description: Total number of matching results.
+          example: 4217
+        page:
+          type: integer
+          description: Current page index (zero-based).
+          example: 0
+        size:
+          type: integer
+          description: Page size used for this response.
+          example: 25
+        facetten:
+          type: object
+          description: |
+            Facet counts for further filtering. Keys are facet category names
+            (e.g. `arbeitgeber`, `arbeitsort`), values are objects with a
+            `counts` map and a `maxCount` integer.
+          additionalProperties:
+            $ref: "#/components/schemas/FacetData"
+
+    FacetData:
+      type: object
+      properties:
+        counts:
+          type: object
+          description: Map of facet value to result count.
+          additionalProperties:
+            type: integer
+        maxCount:
+          type: integer
+          description: Maximum count among all facet values.
+
+    JobListing:
+      type: object
+      description: |
+        A single job listing from search results. Note: `beruf` and
+        `arbeitgeber` fields were historically always present but as of
+        March 2026 may be omitted by the API.
+      required:
+        - refnr
+        - arbeitsort
+      properties:
+        hashId:
+          type: string
+          description: Hash identifier for the listing.
+        refnr:
+          type: string
+          description: Reference number (use this to fetch job details).
+          example: 10001-1234567-S
+        beruf:
+          type: string
+          description: Job profession / occupation name (may be absent).
+          example: Softwareentwickler/in
+        titel:
+          type: string
+          description: Job listing title.
+          example: Senior Rust Engineer (m/w/d)
+        arbeitgeber:
+          type: string
+          description: Employer name (may be absent).
+          example: ACME GmbH
+        aktuelleVeroeffentlichungsdatum:
+          type: string
+          format: date
+          description: Publication date (ISO 8601, YYYY-MM-DD).
+          example: "2026-03-15"
+        eintrittsdatum:
+          type: string
+          format: date
+          description: Earliest start date (ISO 8601, YYYY-MM-DD).
+          example: "2026-05-01"
+        arbeitsort:
+          $ref: "#/components/schemas/WorkLocation"
+        modifikationsTimestamp:
+          type: string
+          description: Last-modified timestamp.
+          example: "2026-03-20T10:15:30.000Z"
+        externeUrl:
+          type: string
+          format: uri
+          description: External URL for the job posting (if hosted externally).
+        kundennummerHash:
+          type: string
+          description: Employer customer-number hash (use to fetch logo).
+          example: VK2qoXBe0s-UAdH_qxLDRrZrY5iY8a1PJt3MjJCXsdo=
+
+    WorkLocation:
+      type: object
+      description: Work location for a job listing (search results).
+      properties:
+        plz:
+          type: string
+          description: Postal code.
+          example: "10115"
+        ort:
+          type: string
+          description: City name.
+          example: Berlin
+        strasse:
+          type: string
+          description: Street name.
+        region:
+          type: string
+          description: Region / federal state.
+          example: Berlin
+        land:
+          type: string
+          description: Country.
+          example: Deutschland
+        koordinaten:
+          $ref: "#/components/schemas/Coordinates"
+        entfernung:
+          type: string
+          description: Distance from the search location in km (only present when `wo` + `umkreis` are used).
+          example: "12.5"
+
+    Coordinates:
+      type: object
+      required:
+        - lat
+        - lon
+      properties:
+        lat:
+          type: number
+          format: double
+          description: Latitude.
+          example: 52.52
+        lon:
+          type: number
+          format: double
+          description: Longitude.
+          example: 13.405
+
+    # ── Job details endpoint ───────────────────────────────────────────
+
+    JobDetails:
+      type: object
+      description: Full details of a single job listing.
+      properties:
+        referenznummer:
+          type: string
+          description: Reference number.
+          example: 10001-1234567-S
+        stellenangebotsTitel:
+          type: string
+          description: Job listing title.
+          example: Senior Rust Engineer (m/w/d)
+        stellenangebotsart:
+          type: string
+          description: Type of job offer (e.g. ARBEIT, AUSBILDUNG).
+        firma:
+          type: string
+          description: Employer / company name.
+          example: ACME GmbH
+        arbeitgeberKundennummerHash:
+          type: string
+          description: Employer hash ID (use to fetch logo).
+        hauptberuf:
+          type: string
+          description: Primary occupation classification.
+        stellenangebotsBeschreibung:
+          type: string
+          description: Full job description (may contain HTML).
+        stellenlokationen:
+          type: array
+          description: List of work locations for this job.
+          items:
+            $ref: "#/components/schemas/JobLocation"
+        arbeitszeitVollzeit:
+          type: boolean
+          description: Whether the position is full-time.
+        arbeitszeitTeilzeitVormittag:
+          type: boolean
+          description: Part-time morning hours.
+        arbeitszeitTeilzeitNachmittag:
+          type: boolean
+          description: Part-time afternoon hours.
+        arbeitszeitTeilzeitAbend:
+          type: boolean
+          description: Part-time evening hours.
+        arbeitszeitTeilzeitFlexibel:
+          type: boolean
+          description: Part-time flexible hours.
+        arbeitszeitSchichtNachtWochenende:
+          type: boolean
+          description: Shift / night / weekend work.
+        verguetungsangabe:
+          type: string
+          description: Compensation / salary information.
+        vertragsdauer:
+          type: string
+          description: Contract duration (e.g. "unbefristet").
+        eintrittszeitraum:
+          $ref: "#/components/schemas/DateRange"
+        veroeffentlichungszeitraum:
+          $ref: "#/components/schemas/DateRange"
+        datumErsteVeroeffentlichung:
+          type: string
+          format: date
+          description: Date of first publication (ISO 8601).
+          example: "2026-03-01"
+        aenderungsdatum:
+          type: string
+          description: Last modification date.
+        istBetreut:
+          type: boolean
+          description: Whether the listing is managed by a BA advisor.
+        istBehinderungGefordert:
+          type: boolean
+          description: Whether the listing targets people with disabilities.
+        istGeringfuegigeBeschaeftigung:
+          type: boolean
+          description: Whether this is marginal employment (mini-job).
+        istArbeitnehmerUeberlassung:
+          type: boolean
+          description: Whether this is temporary agency work.
+        istPrivateArbeitsvermittlung:
+          type: boolean
+          description: Whether this is a private employment agency listing.
+        quereinstiegGeeignet:
+          type: boolean
+          description: Whether the position is suitable for career changers.
+        allianzpartnerName:
+          type: string
+          description: Alliance partner name (external job board).
+        allianzpartnerUrl:
+          type: string
+          format: uri
+          description: Alliance partner URL.
+        chiffrenummer:
+          type: string
+          description: Cipher number (anonymised reference).
+        externeURL:
+          type: string
+          format: uri
+          description: External URL for the job posting.
+        geforderterBildungsabschluss:
+          type: string
+          description: Required educational qualification.
+        ausbildungsart:
+          type: string
+          description: Type of apprenticeship (for Ausbildung listings).
+        studienform:
+          type: string
+          description: Study format (for dual-study listings).
+        studiengang:
+          type: string
+          description: Course of study (for dual-study listings).
+
+    JobLocation:
+      type: object
+      description: A work location from the job details endpoint.
+      properties:
+        adresse:
+          $ref: "#/components/schemas/LocationAddress"
+        breite:
+          type: number
+          format: double
+          description: Latitude.
+          example: 52.52
+        laenge:
+          type: number
+          format: double
+          description: Longitude.
+          example: 13.405
+
+    LocationAddress:
+      type: object
+      description: Address within a job location.
+      properties:
+        plz:
+          type: string
+          description: Postal code.
+          example: "10115"
+        ort:
+          type: string
+          description: City.
+          example: Berlin
+        strasse:
+          type: string
+          description: Street name.
+        hausnummer:
+          type: string
+          description: House number.
+        region:
+          type: string
+          description: Region / federal state.
+          example: Berlin
+        land:
+          type: string
+          description: Country.
+          example: Deutschland
+
+    DateRange:
+      type: object
+      description: A date range with optional start and end.
+      properties:
+        von:
+          type: string
+          format: date
+          description: Start date (ISO 8601).
+          example: "2026-03-01"
+        bis:
+          type: string
+          format: date
+          description: End date (ISO 8601).
+          example: "2026-09-30"
+
+    # ── Shared ─────────────────────────────────────────────────────────
+
+    Error:
+      type: object
+      description: Generic error response.
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        status:
+          type: integer
+          description: HTTP status code.
