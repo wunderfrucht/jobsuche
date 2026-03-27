@@ -1,0 +1,103 @@
+artifacts:
+  # ──────────────────────────────────────────────────
+  # Cybersecurity Verification (SEC.4)
+  # ──────────────────────────────────────────────────
+
+  - id: CSV-001
+    type: cybersecurity-verification
+    title: Unit test verifies API key not in Debug output
+    status: accepted
+    description: >
+      A unit test constructs a ClientConfig (or Credentials type) with a known
+      API key value, formats it using the Debug trait (format!("{:?}", ...)),
+      and asserts that the resulting string does not contain the key value.
+      This verifies that the custom Debug implementation correctly redacts
+      the API key from all debug output paths.
+    fields:
+      method: automated-test
+      preconditions:
+        - ClientConfig or Credentials type is instantiated with a known API key
+      steps:
+        - Create a Credentials instance with api_key set to a known test value
+        - Format the instance using Debug trait via format!("{:?}", instance)
+        - Assert the formatted string does not contain the test API key value
+        - Assert the formatted string contains "[REDACTED]" or equivalent placeholder
+    links:
+      - type: verifies
+        target: CSREQ-001
+
+  - id: CSV-002
+    type: cybersecurity-verification
+    title: Cargo deny bans openssl/openssl-sys, CI enforces TLS
+    status: accepted
+    description: >
+      A cargo-deny configuration bans the openssl and openssl-sys crates from
+      the dependency tree, ensuring that native-tls cannot be used even
+      transitively. CI runs cargo deny check on every pull request. Additionally,
+      a code review checklist item verifies that the reqwest dependency in
+      Cargo.toml specifies only the rustls-tls feature and that the base URL
+      constant uses the https:// scheme.
+    fields:
+      method: static-analysis
+      preconditions:
+        - cargo-deny is installed and configured in the project
+        - CI pipeline includes cargo deny check step
+      steps:
+        - Run cargo deny check to verify openssl/openssl-sys are not in dependency tree
+        - Review Cargo.toml to confirm reqwest uses only rustls-tls feature
+        - Verify API base URL constant uses https:// scheme
+        - Confirm no code path allows overriding the base URL to http://
+    links:
+      - type: verifies
+        target: CSREQ-002
+
+  - id: CSV-003
+    type: cybersecurity-verification
+    title: Unit test and proptest verify page limit enforcement
+    status: accepted
+    description: >
+      Unit tests verify that both the sync JobIterator and async pagination
+      stream stop after exactly 100 pages when more results are available.
+      A proptest generates random page sizes and total result counts, verifying
+      that the number of pages fetched never exceeds the MAX_PAGES constant
+      regardless of input parameters. Edge cases tested include size=1 with
+      maxErgebnisse=u32::MAX and size=100 with exactly 100 pages of results.
+    fields:
+      method: automated-test
+      preconditions:
+        - Mock HTTP server or test double that simulates unlimited pagination
+        - proptest crate available in dev-dependencies
+      steps:
+        - Configure mock to return unlimited pages of results
+        - Create JobIterator and consume all results via collect
+        - Assert that exactly 100 page requests were made
+        - Run proptest with arbitrary page sizes and total counts
+        - Assert page count never exceeds MAX_PAGES for any input combination
+    links:
+      - type: verifies
+        target: CSREQ-003
+
+  - id: CSV-004
+    type: cybersecurity-verification
+    title: Proptest roundtrip test for base64 encode/decode
+    status: accepted
+    description: >
+      A proptest generates arbitrary valid reference number strings and verifies
+      that decode(encode(refnr)) == refnr for every generated input. Additional
+      targeted tests verify that empty strings are rejected, that strings
+      containing path separators (/, ..) are handled safely, and that the
+      encoding output matches the API's expected base64 standard format.
+    fields:
+      method: automated-test
+      preconditions:
+        - proptest crate available in dev-dependencies
+      steps:
+        - Generate arbitrary non-empty strings via proptest
+        - Encode each string using the library's base64 encoding function
+        - Decode the result using the library's base64 decoding function
+        - Assert the decoded value equals the original input
+        - Test that empty string input returns an appropriate error
+        - Test that path separator characters do not produce traversal payloads
+    links:
+      - type: verifies
+        target: CSREQ-004

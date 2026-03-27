@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-27T18:24:45Z",
+  "generated_at": "2026-03-27T19:43:35Z",
   "endpoints": {
     "job_details": {
       "method": "GET",

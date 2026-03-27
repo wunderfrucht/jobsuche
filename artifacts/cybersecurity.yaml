@@ -217,6 +217,24 @@ artifacts:
       - type: assesses
         target: TS-004
 
+  - id: RA-005
+    type: risk-assessment
+    title: Reference number injection risk
+    status: accepted
+    description: >
+      Risk that a crafted reference number produces a path traversal payload
+      after base64 encoding. Feasibility is low because base64 encoding
+      transforms the input into a safe alphabet (A-Z, a-z, 0-9, +, /, =)
+      that cannot produce path separators or special characters in the
+      encoded output. The API endpoint also validates the decoded reference
+      number server-side. Risk accepted with monitoring.
+    fields:
+      risk-level: acceptable
+      risk-treatment: accept
+    links:
+      - type: assesses
+        target: TS-005
+
   # ──────────────────────────────────────────────────
   # Cybersecurity Goals (SEC.1 — what we aim for)
   # ──────────────────────────────────────────────────
@@ -272,6 +290,46 @@ artifacts:
     links:
       - type: mitigates
         target: TS-004
+
+  - id: CSG-004
+    type: cybersecurity-goal
+    title: Deserialization must not cause memory safety violations
+    status: accepted
+    description: >
+      The library must handle malicious or malformed API responses without
+      causing panics, memory corruption, or undefined behavior. Serde
+      deserialization into strongly typed Rust structs provides inherent
+      protection through Rust's type system and memory safety guarantees.
+      This risk is accepted because serde_json is memory-safe by design
+      and the typed response structures reject unexpected shapes.
+    fields:
+      verification-criteria: >
+        serde_json is used for all deserialization. No unsafe code is used
+        in response handling. Response types use Option for optional fields
+        rather than assuming presence.
+    links:
+      - type: mitigates
+        target: TS-003
+
+  - id: CSG-005
+    type: cybersecurity-goal
+    title: Base64 encoding must not produce exploitable URL paths
+    status: accepted
+    description: >
+      Reference number encoding must not produce URL path components that
+      could be interpreted as path traversal or injection payloads by the
+      API server. This risk is accepted because base64 standard encoding
+      produces output using only the characters A-Z, a-z, 0-9, +, /, and =,
+      and the encoded value is placed in a single URL path segment that
+      is percent-encoded by reqwest's URL handling.
+    fields:
+      verification-criteria: >
+        Base64 encoded output is placed in a URL path segment via reqwest's
+        URL builder which percent-encodes special characters. The / character
+        in base64 output is percent-encoded to %2F in the URL path.
+    links:
+      - type: mitigates
+        target: TS-005
 
   # ──────────────────────────────────────────────────
   # Cybersecurity Requirements (SEC.1 — how we do it)

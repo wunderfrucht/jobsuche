@@ -366,6 +366,25 @@ artifacts:
     fields:
       action: Re-issue a failed HTTP request after backoff delay
 
+  - id: CA-004
+    type: control-action
+    title: Execute HTTP request via reqwest
+    status: accepted
+    description: >
+      The pagination controller and retry controller delegate HTTP request
+      execution to the HTTP client (reqwest). This control action represents
+      the invocation of reqwest's send method, which handles TLS negotiation,
+      connection pooling, header injection, and response parsing. The HTTP
+      client is an external dependency that enforces transport-level security.
+    tags: [stpa, control-action, http]
+    links:
+      - type: issued-by
+        target: CTRL-001
+      - type: acts-on
+        target: CTRL-003
+    fields:
+      action: Delegate HTTP request execution to the reqwest HTTP client
+
   # ──────────────────────────────────────────────────
   # Step 3 — Unsafe Control Actions
   # ──────────────────────────────────────────────────

@@ -1,0 +1,76 @@
+artifacts:
+  # ──────────────────────────────────────────────────
+  # Cybersecurity Design (SEC.2)
+  # ──────────────────────────────────────────────────
+
+  - id: CSD-001
+    type: cybersecurity-design
+    title: API key excluded from Debug impl via custom Credentials type
+    status: accepted
+    description: >
+      The API key is wrapped in a custom Credentials type that implements
+      Debug manually, outputting "Credentials { api_key: [REDACTED] }" instead
+      of the actual key value. The Display trait is not implemented for
+      Credentials to prevent accidental printing. All types that contain the
+      API key (ClientConfig, internal request builders) use this Credentials
+      wrapper, ensuring the key never appears in debug output, log messages,
+      or error context.
+    fields:
+      mechanism: credential-redaction
+    links:
+      - type: satisfies
+        target: CSREQ-001
+
+  - id: CSD-002
+    type: cybersecurity-design
+    title: reqwest configured with rustls feature only, no plain HTTP fallback
+    status: accepted
+    description: >
+      The reqwest dependency is configured in Cargo.toml with only the
+      rustls-tls feature enabled. The native-tls and default-tls features are
+      explicitly excluded. The API base URL is defined as a constant using the
+      https:// scheme with no mechanism for callers to override it to http://.
+      This ensures all API communication uses TLS 1.2 or higher via the rustls
+      pure-Rust TLS implementation, with no fallback path to unencrypted
+      transport.
+    fields:
+      mechanism: TLS
+      algorithm: TLS 1.2+ via rustls
+    links:
+      - type: satisfies
+        target: CSREQ-002
+
+  - id: CSD-003
+    type: cybersecurity-design
+    title: Hard-coded 100-page limit in pagination controller
+    status: accepted
+    description: >
+      The pagination controller (both sync JobIterator and async stream)
+      enforces a maximum page limit defined as a constant (MAX_PAGES = 100).
+      This limit is checked before each page fetch and cannot be overridden
+      by callers. When the page index reaches the limit, iteration terminates
+      regardless of whether more results appear to be available. This prevents
+      unbounded resource consumption from pagination abuse or misconfiguration.
+    fields:
+      mechanism: resource-limiting
+    links:
+      - type: satisfies
+        target: CSREQ-003
+
+  - id: CSD-004
+    type: cybersecurity-design
+    title: Base64 encode/decode with input validation
+    status: accepted
+    description: >
+      Reference numbers are validated before base64 encoding and inclusion in
+      API URLs. The validation rejects empty strings and verifies the input
+      does not contain characters that could produce path traversal or
+      injection payloads after encoding. The base64 encoding uses the standard
+      alphabet with padding, matching the API's expected format. The
+      encode/decode roundtrip property is verified to ensure data integrity.
+    fields:
+      mechanism: input-validation
+      algorithm: base64 standard with padding
+    links:
+      - type: satisfies
+        target: CSREQ-004

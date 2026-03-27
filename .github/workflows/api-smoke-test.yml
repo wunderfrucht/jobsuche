@@ -36,7 +36,7 @@ jobs:
         run: cargo test --all-features --test api_schema_validation -- --ignored --test-threads=1
       - name: Alert on API schema changes
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');

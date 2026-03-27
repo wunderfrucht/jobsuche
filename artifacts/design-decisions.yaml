@@ -1,0 +1,143 @@
+artifacts:
+  # ──────────────────────────────────────────────────
+  # Design Decisions
+  # ──────────────────────────────────────────────────
+
+  - id: DD-001
+    type: design-decision
+    title: Use reqwest with rustls for HTTP
+    status: accepted
+    description: >
+      The library uses reqwest as the HTTP client, configured exclusively with
+      the rustls-tls feature for TLS support. This avoids dependency on
+      platform-specific OpenSSL installations, ensures consistent TLS behavior
+      across operating systems, and provides a pure-Rust TLS stack that is
+      auditable and memory-safe. The reqwest client is shared between sync
+      (reqwest::blocking) and async (reqwest + middleware) usage paths.
+    fields:
+      rationale: >
+        reqwest is the most widely used Rust HTTP client with mature async
+        support, connection pooling, and built-in TLS configuration. Using
+        rustls instead of native-tls eliminates C dependency build issues
+        and provides a memory-safe TLS implementation. The library needs both
+        blocking and async HTTP, and reqwest supports both through feature
+        flags with a consistent API.
+      alternatives: >
+        ureq (sync-only, would require a separate async client), hyper
+        (lower-level, requires manual connection management), surf (less
+        mature ecosystem). All alternatives would require more boilerplate
+        for equivalent functionality.
+    links:
+      - type: satisfies
+        target: REQ-001
+      - type: satisfies
+        target: REQ-002
+
+  - id: DD-002
+    type: design-decision
+    title: Iterator-based pagination with hard 100-page cap
+    status: accepted
+    description: >
+      Pagination is implemented using Rust's Iterator trait (sync) and
+      futures Stream trait (async), fetching pages lazily on demand. A hard
+      cap of 100 pages is enforced as a constant in the pagination controller,
+      matching the API's own limit. The iterator tracks current page index,
+      total results (maxErgebnisse), and page size to determine when to stop.
+    fields:
+      rationale: >
+        Iterator/Stream-based pagination provides O(1) memory usage and
+        idiomatic Rust consumption patterns (for loops, collect, take, etc.).
+        The hard 100-page cap prevents unbounded resource consumption even if
+        the API reports more results available. Lazy fetching means unused
+        pages are never requested, minimizing API load.
+      alternatives: >
+        Eager collection of all pages (wastes memory and API bandwidth),
+        callback-based pagination (less idiomatic in Rust), manual page
+        management by the caller (error-prone, duplicates logic).
+    links:
+      - type: satisfies
+        target: REQ-003
+
+  - id: DD-003
+    type: design-decision
+    title: Exponential backoff with Retry-After header parsing
+    status: accepted
+    description: >
+      The sync client uses the backon crate for exponential backoff retry
+      logic. When a 429 response includes a Retry-After header, it is parsed
+      as either numeric seconds or HTTP-date format (via the httpdate crate)
+      and used as the wait duration. When the header is absent or unparseable,
+      exponential backoff is used with a maximum delay cap of 60 seconds. The
+      async client uses reqwest-retry middleware with its own ExponentialBackoff.
+    fields:
+      rationale: >
+        Respecting the Retry-After header is critical for avoiding API bans
+        and being a good API citizen. Exponential backoff as a fallback
+        prevents aggressive retries when the header is missing. The backon
+        crate provides a clean, composable retry API that integrates well
+        with Rust's error handling. The 60-second cap prevents indefinite
+        blocking on a single request.
+      alternatives: >
+        Fixed delay retries (suboptimal for varying server load), no retry
+        (fragile in production), custom retry implementation (unnecessary
+        given backon's quality).
+    links:
+      - type: satisfies
+        target: REQ-004
+
+  - id: DD-004
+    type: design-decision
+    title: thiserror-based error enum with typed variants
+    status: accepted
+    description: >
+      All library errors are represented as a single Error enum using the
+      thiserror crate for derive-based Display and From implementations.
+      Each variant carries contextual information: Fault includes StatusCode
+      and ApiErrors, RateLimited includes retry_after seconds, NotFound
+      indicates expired jobs, and specific variants exist for IO, serialization,
+      URI parsing, configuration, builder validation, base64, and async
+      middleware errors.
+    fields:
+      rationale: >
+        A single error enum with thiserror provides exhaustive pattern matching,
+        zero-cost error conversions via From impls, and human-readable error
+        messages via derived Display. Typed variants allow callers to handle
+        specific failure modes (e.g., retry on RateLimited, show user message
+        on NotFound) without string matching or downcasting. The contextual
+        data in each variant (retry_after, status codes) enables informed
+        error recovery.
+      alternatives: >
+        anyhow (no typed variants, unsuitable for a library), Box<dyn Error>
+        (loses type information), separate error types per module (fragmented
+        API surface).
+    links:
+      - type: satisfies
+        target: REQ-005
+
+  - id: DD-005
+    type: design-decision
+    title: Builder pattern for type-safe search query construction
+    status: accepted
+    description: >
+      Search queries are constructed using SearchOptionsBuilder, a fluent
+      builder that validates parameters at build time. All API parameters
+      (was, wo, umkreis, arbeitszeit, befristung, angebotsart, etc.) are
+      represented as strongly typed Rust enums or bounded numeric types.
+      The builder serializes to URL query parameters using url::form_urlencoded,
+      with enum values automatically formatted as the API expects (e.g.,
+      semicolon-separated multiple values).
+    fields:
+      rationale: >
+        The builder pattern with typed parameters catches invalid queries at
+        compile time rather than at runtime. Enum types for arbeitszeit,
+        befristung, and angebotsart ensure only valid API values are sent.
+        The builder's validation (size capped at 100, veroeffentlichtseit
+        capped at 100) prevents requests that would be rejected by the API.
+        Round-trip support via as_builder() enables query modification.
+      alternatives: >
+        Raw HashMap<String, String> (no compile-time safety), procedural
+        macro-based query DSL (over-engineered for this use case), direct
+        struct construction (no validation at construction time).
+    links:
+      - type: satisfies
+        target: REQ-001
