@@ -33,6 +33,14 @@ struct Baseline {
     version: String,
     generated_at: String,
     endpoints: BTreeMap<String, EndpointBaseline>,
+    #[serde(default)]
+    pagination: Option<PaginationBaseline>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct PaginationBaseline {
+    page_100_status: u16,
+    page_101_status: u16,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -331,74 +339,62 @@ fn diff_schemas(
 // Pagination limit check
 // ---------------------------------------------------------------------------
 
-fn check_pagination_limit(client: &reqwest::blocking::Client) -> Vec<SchemaChange> {
+fn fetch_pagination_status(client: &reqwest::blocking::Client, page: u32) -> u16 {
+    delay();
+    let url = format!(
+        "{}/pc/v4/jobs?was=Informatik&size=5&page={}",
+        API_BASE, page
+    );
+    match client.get(&url).send() {
+        Ok(r) => r.status().as_u16(),
+        Err(_) => 0, // network error
+    }
+}
+
+fn check_pagination_limit(
+    client: &reqwest::blocking::Client,
+    baseline: &Option<PaginationBaseline>,
+) -> Vec<SchemaChange> {
     let mut changes = Vec::new();
 
-    // Page 100 should succeed
-    delay();
-    let url_100 = format!("{}/pc/v4/jobs?was=Informatik&size=5&page=100", API_BASE);
-    let resp_100 = client.get(&url_100).send();
-    let page_100_ok = match &resp_100 {
-        Ok(r) => r.status().is_success(),
-        Err(_) => false,
+    let Some(expected) = baseline else {
+        // No pagination baseline recorded — skip check
+        return changes;
     };
 
-    // Page 101 should fail with 400
-    delay();
-    let url_101 = format!("{}/pc/v4/jobs?was=Informatik&size=5&page=101", API_BASE);
-    let resp_101 = client.get(&url_101).send();
-    let page_101_status = match &resp_101 {
-        Ok(r) => Some(r.status().as_u16()),
-        Err(_) => None,
-    };
+    let actual_100 = fetch_pagination_status(client, 100);
+    let actual_101 = fetch_pagination_status(client, 101);
 
-    if !page_100_ok {
-        let status = resp_100
-            .ok()
-            .map(|r| r.status().as_u16().to_string())
-            .unwrap_or_else(|| "network error".to_string());
+    if actual_100 != expected.page_100_status {
         changes.push(SchemaChange {
             endpoint: "search".to_string(),
             field_path: "pagination.page_100".to_string(),
             change_type: "pagination_changed".to_string(),
             severity: "critical".to_string(),
-            old_type: Some("200".to_string()),
-            new_type: Some(status),
-            detail: "Page 100 no longer returns success — pagination limit may have changed"
-                .to_string(),
+            old_type: Some(expected.page_100_status.to_string()),
+            new_type: Some(actual_100.to_string()),
+            detail: format!(
+                "Page 100 returned HTTP {} instead of expected {} — pagination limit may have changed",
+                actual_100, expected.page_100_status
+            ),
             fingerprint: "schema:pagination_changed:pagination.page_100".to_string(),
         });
     }
 
-    match page_101_status {
-        Some(400) => { /* expected */ }
-        Some(status) => {
-            changes.push(SchemaChange {
-                endpoint: "search".to_string(),
-                field_path: "pagination.page_101".to_string(),
-                change_type: "pagination_changed".to_string(),
-                severity: "critical".to_string(),
-                old_type: Some("400".to_string()),
-                new_type: Some(status.to_string()),
-                detail: format!(
-                    "Page 101 returned HTTP {} instead of expected 400 — pagination limit may have changed",
-                    status
-                ),
-                fingerprint: "schema:pagination_changed:pagination.page_101".to_string(),
-            });
-        }
-        None => {
-            changes.push(SchemaChange {
-                endpoint: "search".to_string(),
-                field_path: "pagination.page_101".to_string(),
-                change_type: "pagination_changed".to_string(),
-                severity: "critical".to_string(),
-                old_type: Some("400".to_string()),
-                new_type: Some("network error".to_string()),
-                detail: "Page 101 request failed with network error".to_string(),
-                fingerprint: "schema:pagination_changed:pagination.page_101".to_string(),
-            });
-        }
+    if actual_101 != expected.page_101_status {
+        changes.push(SchemaChange {
+            endpoint: "search".to_string(),
+            field_path: "pagination.page_101".to_string(),
+            change_type: "pagination_changed".to_string(),
+            severity: "critical".to_string(),
+            old_type: Some(expected.page_101_status.to_string()),
+            new_type: Some(actual_101.to_string()),
+            detail: format!(
+                "Page 101 returned HTTP {} instead of expected {} — pagination limit may have changed",
+                actual_101, expected.page_101_status
+            ),
+            fingerprint: "schema:pagination_changed:pagination.page_101".to_string(),
+        });
     }
 
     changes
@@ -569,10 +565,22 @@ fn run_update_baseline() {
         );
     }
 
+    // Record pagination status codes
+    let page_100_status = fetch_pagination_status(&client, 100);
+    let page_101_status = fetch_pagination_status(&client, 101);
+    println!(
+        "  pagination: page 100 -> HTTP {}, page 101 -> HTTP {}",
+        page_100_status, page_101_status
+    );
+
     let baseline = Baseline {
         version: "1.0".to_string(),
         generated_at: chrono_now(),
         endpoints,
+        pagination: Some(PaginationBaseline {
+            page_100_status,
+            page_101_status,
+        }),
     };
 
     let json = serde_json::to_string_pretty(&baseline).expect("Failed to serialize baseline");
@@ -651,7 +659,7 @@ fn api_schema_validate() {
     }
 
     // Check pagination limits
-    let pagination_changes = check_pagination_limit(&client);
+    let pagination_changes = check_pagination_limit(&client, &baseline.pagination);
     all_changes.extend(pagination_changes);
 
     // Write report

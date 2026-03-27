@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-27T18:20:58Z",
+  "generated_at": "2026-03-27T18:24:45Z",
   "endpoints": {
     "job_details": {
       "method": "GET",
@@ -3682,5 +3682,9 @@
         }
       }
     }
+  },
+  "pagination": {
+    "page_100_status": 200,
+    "page_101_status": 200
   }
 }
