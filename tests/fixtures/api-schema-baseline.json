@@ -1,0 +1,3686 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-03-27T18:20:58Z",
+  "endpoints": {
+    "job_details": {
+      "method": "GET",
+      "path": "/pc/v4/jobdetails/{encoded_refnr}",
+      "fields": {
+        "aenderungsdatum": {
+          "type": "string",
+          "required": true
+        },
+        "allianzpartnerName": {
+          "type": "string",
+          "required": true
+        },
+        "allianzpartnerUrl": {
+          "type": "string",
+          "required": true
+        },
+        "arbeitgeberKundennummerHash": {
+          "type": "string",
+          "required": false
+        },
+        "arbeitszeitSchichtNachtWochenende": {
+          "type": "boolean",
+          "required": true
+        },
+        "arbeitszeitTeilzeitAbend": {
+          "type": "boolean",
+          "required": true
+        },
+        "arbeitszeitTeilzeitFlexibel": {
+          "type": "boolean",
+          "required": true
+        },
+        "arbeitszeitTeilzeitNachmittag": {
+          "type": "boolean",
+          "required": true
+        },
+        "arbeitszeitTeilzeitVormittag": {
+          "type": "boolean",
+          "required": true
+        },
+        "arbeitszeitVollzeit": {
+          "type": "boolean",
+          "required": true
+        },
+        "ausbildungsart": {
+          "type": "string",
+          "required": true
+        },
+        "chiffrenummer": {
+          "type": "string",
+          "required": false
+        },
+        "datumErsteVeroeffentlichung": {
+          "type": "string",
+          "required": true
+        },
+        "eintrittszeitraum": {
+          "type": "object",
+          "required": true
+        },
+        "eintrittszeitraum.von": {
+          "type": "string",
+          "required": true
+        },
+        "externeURL": {
+          "type": "string",
+          "required": false
+        },
+        "firma": {
+          "type": "string",
+          "required": true
+        },
+        "geforderterBildungsabschluss": {
+          "type": "string",
+          "required": true
+        },
+        "istArbeitnehmerUeberlassung": {
+          "type": "boolean",
+          "required": true
+        },
+        "istBehinderungGefordert": {
+          "type": "boolean",
+          "required": true
+        },
+        "istBetreut": {
+          "type": "boolean",
+          "required": true
+        },
+        "istGeringfuegigeBeschaeftigung": {
+          "type": "boolean",
+          "required": false
+        },
+        "istPrivateArbeitsvermittlung": {
+          "type": "boolean",
+          "required": true
+        },
+        "quereinstiegGeeignet": {
+          "type": "boolean",
+          "required": false
+        },
+        "referenznummer": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebotsBeschreibung": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebotsTitel": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebotsart": {
+          "type": "string",
+          "required": true
+        },
+        "stellenlokationen": {
+          "type": "array",
+          "required": true
+        },
+        "stellenlokationen[]": {
+          "type": "object",
+          "required": true
+        },
+        "stellenlokationen[].adresse": {
+          "type": "object",
+          "required": true
+        },
+        "stellenlokationen[].adresse.hausnummer": {
+          "type": "string",
+          "required": false
+        },
+        "stellenlokationen[].adresse.land": {
+          "type": "string",
+          "required": true
+        },
+        "stellenlokationen[].adresse.ort": {
+          "type": "string",
+          "required": true
+        },
+        "stellenlokationen[].adresse.plz": {
+          "type": "string",
+          "required": true
+        },
+        "stellenlokationen[].adresse.region": {
+          "type": "string",
+          "required": true
+        },
+        "stellenlokationen[].adresse.strasse": {
+          "type": "string",
+          "required": true
+        },
+        "stellenlokationen[].breite": {
+          "type": "number",
+          "required": true
+        },
+        "stellenlokationen[].laenge": {
+          "type": "number",
+          "required": true
+        },
+        "studienform": {
+          "type": "string",
+          "required": true
+        },
+        "studiengang": {
+          "type": "string",
+          "required": true
+        },
+        "verguetungsangabe": {
+          "type": "string",
+          "required": true
+        },
+        "veroeffentlichungszeitraum": {
+          "type": "object",
+          "required": true
+        },
+        "veroeffentlichungszeitraum.von": {
+          "type": "string",
+          "required": true
+        },
+        "vertragsdauer": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "search": {
+      "method": "GET",
+      "path": "/pc/v4/jobs",
+      "fields": {
+        "facetten": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitgeber": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.ALTEN Consulting Services GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.ALTEN Consulting Services GmbH Stuttgart": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.ALTEN GmbH Coburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.AOK Systems GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.AUMOVIO SE Haupverwaltung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Airbus Defence and Space GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Akkodis Germany Tech Experts GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Aschert & Bohrmann GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.BMW AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.BWI GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Bechtle AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Bluewave Select GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Brunel GmbH NL Kassel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Bundesdruckerei Gruppe GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Bundesverwaltungsamt": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.CANCOM SE": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.CHECK24 Services Personal GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Cs2 ITEC GmbH   Co. KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.DIS AG - Office & Management -": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.DIS AG Personaldienstleistungen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.DKV Euro Service GmbH + Co.KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Deloitte GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Deutsche Bahn AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Deutsche Glasfaser Holding GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Deutsche Lufthansa AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Deutsche Rentenversicherung Bund": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Deutsche Telekom AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Diehl Defence GmbH & Co. KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Dirk Rossmann GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.EY Consulting GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Augsburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Bielefeld": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Bremen City": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Freiburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Friedrichshafen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Giessen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Hamburg-City": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Hannover": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Karlsruhe City": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Kassel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Kiel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Köln": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Leipzig": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Mannheim": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung München Mobility": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Nürnberg City": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Osnabrück": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Rosenheim": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Stuttgart Mobility": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FERCHAU GmbH Niederlassung Ulm": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.FUX Solutions GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Finanz Informatik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Finanz Informatik GmbH & Co. KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Fraunhofer-Gesellschaft e.V. Zentrale München": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Guldberg GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.HUK-COBURG VVaG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Hays AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Hays Professional Solutions GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.I. K. Hofmann GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.IABG Industrieanlagen Betriebs-GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.IU Internationale Hochschule": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Ivona Koban Personalagentur Ivona Koban M. A.": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Jan Schreiner Private Arbeitsvermittlung Arbitex": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.KHS GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.L&W CONSOLIDATION GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.LZ Informatik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Mercedes-Benz Group AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.NTT DATA Deutschland SE": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.OHB-System AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Orizon GmbH, Unit Aviation": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Pan Dacom Networking AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.PerZukunft Arbeitsvermittlung GmbH&Co.KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.PricewaterhouseCoopers GmbH WPG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Provadis Partner für Bildung und Beratung GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.R+V Allgemeine Versicherung AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.REWE digital GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Rheinmetall AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Robert Bosch GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Rohde & Partner": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.SAP": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.SIGNAL IDUNA Krankenversicherung a. G.": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.SINTEC Informatik GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Schmieder GmbH Unternehmensberatung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Siemens AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Siemens Energy Global GmbH & Co. KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.SimpleXX GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.TKMS GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Tesla Automation GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.Vodafone GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.WITRON Logistik+Informatik GmbH & Co. KG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.]init[ AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.alfatraining Bildungszentrum GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.avivar experts GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.citema systems GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.men-in-motion GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.prognum Automotive GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.puro Personaldienstleistung GmbH": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.recruitIT Consulting": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.secunet Security Networks AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.counts.thyssenkrupp AG": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitgeber.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitsort.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Aachen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Affalterbach, Württemberg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Aschaffenburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Augsburg, Bayern": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Bamberg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Bergisch Gladbach": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Berlin": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Biberach an der Riß": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Bielefeld": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Bochum": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Bonn": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Braunschweig": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Bremen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Burgwedel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Böblingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Chemnitz, Sachsen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Coburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Cottbus": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Darmstadt": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Deggendorf": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Donauwörth": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Dortmund": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Dreieich": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Dresden": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Duisburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Düsseldorf": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Erfurt": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Erlangen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Eschborn, Taunus": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Essen, Ruhr": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ettlingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Frankfurt am Main": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Freiburg im Breisgau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Friedrichshafen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Fulda": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Fürth, Bayern": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Gelsenkirchen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Gießen, Lahn": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Göppingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Göttingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Gütersloh": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Halle (Saale)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Hamburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Hannover": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Heidelberg, Neckar": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Heilbronn, Neckar": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Immenstaad am Bodensee": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ingolstadt, Donau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Jena": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Kaiserslautern": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Karlsruhe, Baden": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Kassel, Hessen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Kiel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Koblenz am Rhein": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Konstanz": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Köln": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Leinfelden-Echterdingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Leipzig": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ludwigsburg, Württemberg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Lörrach": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Lübeck": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Magdeburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Mainz am Rhein": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Manching": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Mannheim": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Mönchengladbach": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.München": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Münster, Westfalen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Neckarsulm": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Nürnberg, Mittelfranken": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Oberkochen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Offenburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Oldenburg (Oldb)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Osnabrück": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ottobrunn": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Paderborn": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Parkstein": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Potsdam": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ratingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ravensburg, Württemberg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Regensburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Reutlingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Rosenheim, Oberbayern": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Rostock": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Saarbrücken": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Siegen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Sindelfingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Stuttgart": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Taufkirchen, Kreis München": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Tübingen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Ulm, Donau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Unterlüß": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Villingen-Schwenningen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Walldorf, Baden": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Wedel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Wiesbaden": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Wolfsburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Wuppertal": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Würzburg": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.counts.Überlingen, Bodensee": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.01067": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.01069": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.01109": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.01129": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.04103": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.04105": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.04109": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.04317": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.06108": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.07743": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.07745": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.09111": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10115": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10117": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10178": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10247": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10559": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10709": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10719": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.10969": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.12489": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.18055": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.18057": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.20095": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.20097": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.20099": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.20148": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.20457": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.22297": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.22335": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.22587": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.22880": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.24103": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.24116": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.24118": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.24143": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.27809": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.28195": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.28197": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.28199": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.28217": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.28309": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.28359": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.29345": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30159": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30169": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30173": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30419": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30539": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30625": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30655": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.30938": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.33100": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.33602": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.33609": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.34117": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.34127": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.34131": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.38100": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.38440": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.39104": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.40210": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.40213": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.40472": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.40476": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.40549": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.40882": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.44135": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.44139": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.44227": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.44263": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.44787": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.45127": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.48143": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.48147": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.48155": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.48480": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.50667": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.50672": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.50679": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.50829": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.50933": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.51103": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.51149": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.52070": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.53111": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.53113": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.53117": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.53119": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.53175": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.53177": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.54595": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.55116": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.56070": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60306": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60311": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60313": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60322": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60327": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60486": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60487": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.60549": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.61352": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.63225": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.63303": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.64839": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.65185": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.65189": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.65760": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.65929": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.66115": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.66123": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.68159": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.68161": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.68163": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.68165": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.68167": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.69190": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70173": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70174": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70469": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70567": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70597": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70629": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.70771": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.71034": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.71063": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.71522": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.71563": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.72768": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.73447": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.74076": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.74172": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.74523": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.76131": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.76133": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.76135": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.76227": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.76275": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.78052": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.78462": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.78467": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.79098": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.79106": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.79108": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80331": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80333": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80335": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80538": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80636": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80637": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80686": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80687": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80807": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80809": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80992": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80995": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.80997": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.81829": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.82024": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.82205": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.82377": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.83026": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.85077": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.85521": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.86159": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.86609": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.87700": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88045": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88090": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88161": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88212": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88400": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88471": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.88662": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.89073": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.89075": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.89077": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.89081": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.90402": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.90411": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.90429": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.90441": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.90489": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.90762": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.91052": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.91058": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.92711": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.93047": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.93055": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.94315": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.94469": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.96052": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.96450": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.97070": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.97080": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.97084": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.97980": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.99091": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.counts.99310": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitsort_plz.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitszeit": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitszeit.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.arbeitszeit.counts.ho": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitszeit.counts.mj": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitszeit.counts.snw": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitszeit.counts.tz": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitszeit.counts.vz": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.arbeitszeit.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.ausbildungsart": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.ausbildungsart.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.ausbildungsart.counts.0": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.ausbildungsart.counts.1": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.ausbildungsart.counts.2": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.ausbildungsart.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.ausbildungsverguetung": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.ausbildungsverguetung.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.ausbildungsverguetung.counts.monat": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.ausbildungsverguetung.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.befristung": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.befristung.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.befristung.counts.1": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.befristung.counts.2": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.befristung.counts.3": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.befristung.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.behinderung": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.behinderung.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.behinderung.counts.false": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.behinderung.counts.true": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.behinderung.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.beruf.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.beruf.counts.Account-Manager/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Anwendungsberater/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Anwendungsprogrammierer/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Anwendungssystemadministrator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Anwendungssystemberater/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Application-Engineer/-Manager/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Assistent/in - Informatik (Softwaretechnik)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Assistent/in - Informatik (Wirtschaftsinformatik)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Assistent/in - Informatik (allgemeine Informatik)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Assistent/in - Informatik (technische Informatik)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Backend-Entwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Berater/in - digitale Transformation": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Betriebswirt/in (Fachschule) - Projektmanagement": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Betriebswirt/in (Hochschule)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Business-Analyst/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Cloud-Architect": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Controller/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Cyber-Security-Consultant": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Data Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Data Scientist": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Data-Analyst/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Datenbankadministrator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Datenbankentwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.DevOps Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.ERP-Anwendungsentwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.ERP-Berater/in - ERP-Consultant": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.ERP-Systembetreuer/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Elektroniker/in - Automatisierungstechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Elektroniker/in - Betriebstechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Elektroniker/in - Energie- und Gebäudetechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Elektroniker/in - Geräte und Systeme": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Embedded-Systems-Entwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Fachinformatiker/in - Anwendungsentwicklung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Fachinformatiker/in - Daten- und Prozessanalyse": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Fachinformatiker/in - Digitale Vernetzung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Fachinformatiker/in - Systemintegration": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.First-Level-Supporter/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Forschungs- und Entwicklungsingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Frontend-Entwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Fullstack-Entwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Gruppen-, Teamleiter/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Administrator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Berater/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Entwickler/in (Weiterbildung/Ausbildung)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Kundenbetreuer/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Lösungsentwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Manager/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Projektkoordinator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Projektleiter/in (Weiterbildung/Ausbildung)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Sicherheitskoordinator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-System-Elektroniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-System-Kaufmann/-frau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Systemadministrator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.IT-Tester/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Industriekaufmann/-frau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Industriemechaniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Informatiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Informatiker/in (Weiterbildung)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Informatikkaufmann/-frau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Informationssicherheitsbeauftragte/r": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Automatisierungstechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Elektrotechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Informations-, Kommunikationstechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Luft- und Raumfahrttechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Maschinenbau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Mechatronik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - Systems Engineering": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieur/in - technische Informatik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Ingenieurinformatiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.KI-Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Kaufmann/-frau - Digitalisierungsmanagement": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Kaufmann/-frau - IT-System-Management": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Leiter/in - IT": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Leiter/in - Informations-/Cybersicherheit": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Mathematiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Mathematisch-technische/r Softwareentwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Mechatroniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Netzwerk-Servicetechniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Netzwerkadministrator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Physiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Product Owner": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Produktmanager/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Projektingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Projektleiter/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Qualitätsingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Sicherheitstechniker/in (IT)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Software-Architect": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Softwareentwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Systeminformatiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Techniker/in - Informatik (Nachhaltige Digitalisierung)/Bachelor Professional in Technik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Techniker/in - Informatik (Netzwerktechnologie)/Bachelor Professional in Technik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Techniker/in - Informatik (technische Informatik)/Bachelor Professional in Technik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Testingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Web Developer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Wirtschaftsinformatiker/in (Fachschule)/Bachelor Professional in Wirtschaft": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Wirtschaftsinformatiker/in (Hochschule)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Wirtschaftsinformatiker/in - IT-Systeme": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Wirtschaftsingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Wissenschaftliche/r Mitarbeiter/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.counts.Zerspanungsmechaniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.beruf.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.berufsfeld.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Arzt- und Praxishilfe": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Bauplanung und -überwachung, Architektur": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Berg-, Tagebau und Sprengtechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Biologie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Büro und Sekretariat": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Chemie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Drucktechnik, Buchbinderei": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Einkauf und Vertrieb": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Elektrotechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Energietechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Ernährungs- und Gesundheitsberatung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Erziehung, Sozialarbeit, Heilerziehungspflege": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Fahrzeug-, Luft-, Raumfahrt- und Schiffbautechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Fahrzeugführung im Eisenbahnverkehr": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Fahrzeugführung im Schiffsverkehr": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Fahrzeugführung im Straßenverkehr": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Feinwerk- und Werkzeugtechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Gartenbau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Gastronomie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Gebäudetechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Geisteswissenschaften": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Geologie, Geografie und Meteorologie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Geschäftsführung und Vorstand": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Gesellschaftswissenschaften": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Getränkeherstellung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Gewerbe, Gesundheitsaufsicht, Desinfektion": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Handel": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Holzbe- und -verarbeitung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Human- und Zahnmedizin": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.IT-Netzwerktechnik, -Administration, -Organisation": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.IT-Systemanalyse, -Anwendungsberatung und -Vertrieb": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Immobilienwirtschaft und Facility-Management": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Industrielle Glasherstellung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Informatik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Kaufleute - Verkehr und Logistik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Klempnerei, Sanitär-, Heizungs- und Klimatechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Krankenpflege, Rettungsdienst und Geburtshilfe": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Kunststoff- und Kautschukherstellung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Lagerwirtschaft, Post und Zustellung, Güterumschlag": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Landwirtschaft": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Lebensmittel- und Genussmittelherstellung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Leder- und Pelzherstellung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Lehr- und Forschungstätigkeit an Hochschulen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Lehrtätigkeit an allgemeinbildenden Schulen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Lehrtätigkeit an außerschulischen Bildungseinrichtungen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Lehrtätigkeit berufsbildender Fächer und betriebliche Ausbildung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Maschinenbau- und Betriebstechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Mathematik und Statistik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Mechatronik und Automatisierungstechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Medien-, Dokumentations- und Informationsdienste": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Medizin-, Orthopädie- und Rehatechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Medizinisches Laboratorium": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Metallbau und Schweißtechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Metallbearbeitung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Metallerzeugung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Metalloberflächenbehandlung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Musik-, Gesang-, Dirigententätigkeiten": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Naturstein- und Mineralaufbereitung, Baustoffherstellung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Objekt-, Personen-, Brandschutz, Arbeitssicherheit": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Offiziere": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Personalwesen und -dienstleistung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Pharmazie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Physik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Polizei- und Kriminaldienst, Gerichts- und Justizvollzug": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Produkt- und Industriedesign": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Psychologie, nichtärztliche Psychotherapie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Rechnungswesen, Controlling und Revision": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Rechtsberatung, -sprechung und -ordnung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Redaktion und Journalismus": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Reinigung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Softwareentwicklung und Programmierung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Sprach- und Literaturwissenschaften": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Steuerberatung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Technische Forschung und Entwicklung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Technische Mediengestaltung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Technische Produktionsplanung und -steuerung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Technisches Zeichnen, Konstruktion und Modellbau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Textilverarbeitung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Tiefbau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Tiermedizin und Tierheilkunde": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Tourismus und Sport": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Umweltmanagement und -beratung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Unternehmensorganisation und -strategie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Unteroffiziere mit Portepee": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Ver- und Entsorgung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Veranstaltungs-, Kamera-, Tontechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Veranstaltungsservice und -management": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Verkauf (ohne Produktspezialisierung)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Verkauf von drogerie- und apothekenüblichen Waren": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Verlags- und Medienwirtschaft": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Vermessung und Kartografie": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Versicherungs- und Finanzdienstleistungen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Verwaltung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Werbung und Marketing": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Wirtschaftswissenschaften": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.counts.Überwachung und Steuerung des Verkehrsbetriebs": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.berufsfeld.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.branche.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.branche.counts.1": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.10": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.11": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.12": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.13": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.14": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.15": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.16": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.17": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.18": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.19": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.2": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.20": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.21": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.22": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.23": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.24": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.25": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.26": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.27": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.28": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.29": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.3": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.4": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.5": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.6": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.7": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.8": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.counts.9": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.branche.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.10_01_01-now": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_03_01-26_04_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_04_01-26_05_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_05_01-26_06_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_06_01-26_07_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_07_01-26_08_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_08_01-26_09_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_09_01-26_10_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_10_01-26_11_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_11_01-26_12_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.26_12_01-27_01_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_01_01-27_02_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_03_01-27_04_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_04_01-27_05_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_07_01-27_08_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_08_01-27_09_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_09_01-27_10_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.counts.27_10_01-27_11_01": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.eintrittsdatum.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.externestellenboersen": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.externestellenboersen.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.externestellenboersen.counts.false": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.externestellenboersen.counts.true": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.externestellenboersen.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.homeoffice": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.homeoffice.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.homeoffice.counts.nv_false": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.homeoffice.counts.nv_true": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.homeoffice.counts.prozentual": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.homeoffice.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.pav": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.pav.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.pav.counts.false": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.pav.counts.true": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.pav.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.quereinstieg": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.quereinstieg.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.quereinstieg.counts.false": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.quereinstieg.counts.true": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.quereinstieg.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.schulbildung.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.schulbildung.counts.0": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.1": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.12": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.2": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.3": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.4": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.5": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.counts.6": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.schulbildung.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.verguetung": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.verguetung.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.verguetung.counts.jahr": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.verguetung.counts.stunde": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.verguetung.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts.0": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts.1": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts.14": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts.28": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts.7": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.counts.alle": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.veroeffentlichtseit.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.weitereberufe.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.(Junior) Full-Stack Entwickler (m/w/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.(Junior) Softwareentwickler in der Reise CTO Taskforce": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.(Senior) Fullstack Software Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.1st Level Supporter": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.2nd Level Supporter": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Build-Systeme (MS-Build), Versionsverwaltung (Git) und CI/C": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Business Analytics": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.C++ (C++11 oder neuer)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Controller/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Digital Projects Manager (w/m/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Elektrotechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Elektrotechniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Entwickler": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Entwicklungsingenieur": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Entwicklungsingenieur Embedded Systems": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fachinformatiker": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fachinformatiker/in - Systemintegration": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fachinformatiker/in Systemintegration": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fachinformatiker/in für Daten- und Prozessanalyse": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fachinformatiker:in für Anwendungsentwicklung": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.First Level Support Specialist": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Flight Control": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fullstack Softwareentwickler": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Fullstack_.NET, C#, ASP.NET Core / .NET 6+": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Humanmedizin": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT / Informationssysteme": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT Administrator": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT Consultant": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT Projektmanager": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT Security Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT System Administrator (m/w/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT System Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT System Engineer Linux & AWS Cloud": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Administrator 2nd Level (m/w/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Administrator/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Architekt": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Management": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Netzwerktechniker (m/w/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Portfolio Manager": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Sicherheit": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Supporter (m/w/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Systemadministrator": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Systemadministrator Linux & Cloud": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Systemkaufmann/-frau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.IT-Techniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Informatiker": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Informatiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Informationssicherheit": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Ingenieurwissenschaft": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.KI-Manager": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Kauffrau/Kaufmann im Gesundheitswesen": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Key User SAP SD / CSC / BW + SCM Analytics/KPI´s": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Kundensupport Software": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Lead Developer mit Fokus Java, APIs & Observability (w/m/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Lead Developer mit Fokus PHP & APIs": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Luft- und Raumfahrt": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.MINT": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.MSR": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Maschinenbau": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Mathematik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Mediengestalter:in Digital und Print – Fachrichtung Digitalm": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Medieninformatiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Nachrichtentechnik": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Network Engineer (m/w/d)": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Netzwerkadministrator": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Netzwerktechniker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Product Owner": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Product Owner ServiceNow PPM/FSM": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Product Owner, Technical Product Manager": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Projekt- und Qualitätsmanager/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Projektleiter": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Projektmanagement": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Projektmanager": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Qualitätsingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.SAP Inhouse Consultant": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Senior Fullstack Softwareentwickler": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Senior Network Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Simulation": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Software": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Software Developer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Software Engineer": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Software-Engineering": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwarearchitektur und objektorientiertes Design": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwareentwickler": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwareentwickler C": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwareentwickler C++": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwareentwickler Embedded Systems": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwareentwickler/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Softwaretester": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Sozialversicherungsfachangestellte/r": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Sozialwissenschaften": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.System Design": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.System Engineer Linux & Cloud": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Systemarchitekt": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Systementwickler": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Systemingenieur": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Systemingenieur/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Wirtschaftsinformatiker/in": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.counts.Wirtschaftswissenschaft": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.weitereberufe.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.zeitarbeit": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.zeitarbeit.counts": {
+          "type": "object",
+          "required": true
+        },
+        "facetten.zeitarbeit.counts.false": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.zeitarbeit.counts.true": {
+          "type": "number",
+          "required": true
+        },
+        "facetten.zeitarbeit.maxCount": {
+          "type": "number",
+          "required": true
+        },
+        "maxErgebnisse": {
+          "type": "number",
+          "required": true
+        },
+        "page": {
+          "type": "number",
+          "required": true
+        },
+        "size": {
+          "type": "number",
+          "required": true
+        },
+        "stellenangebote": {
+          "type": "array",
+          "required": true
+        },
+        "stellenangebote[]": {
+          "type": "object",
+          "required": true
+        },
+        "stellenangebote[].aktuelleVeroeffentlichungsdatum": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].arbeitgeber": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].arbeitsort": {
+          "type": "object",
+          "required": true
+        },
+        "stellenangebote[].arbeitsort.koordinaten": {
+          "type": "object",
+          "required": true
+        },
+        "stellenangebote[].arbeitsort.koordinaten.lat": {
+          "type": "number",
+          "required": true
+        },
+        "stellenangebote[].arbeitsort.koordinaten.lon": {
+          "type": "number",
+          "required": true
+        },
+        "stellenangebote[].arbeitsort.land": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].arbeitsort.ort": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].arbeitsort.plz": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].arbeitsort.region": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].arbeitsort.strasse": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].beruf": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].eintrittsdatum": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].externeUrl": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].kundennummerHash": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].modifikationsTimestamp": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].refnr": {
+          "type": "string",
+          "required": true
+        },
+        "stellenangebote[].studiengang": {
+          "type": "string",
+          "required": false
+        },
+        "stellenangebote[].titel": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  }
+}
