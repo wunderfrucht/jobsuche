@@ -19,3 +19,6 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Schema validation
+tests/fixtures/schema-diff-report.json
