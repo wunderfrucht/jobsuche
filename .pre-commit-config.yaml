@@ -58,3 +58,21 @@ repos:
         types: [rust]
         pass_filenames: false
         stages: [pre-push]
+
+      - id: cargo-msrv-check
+        name: MSRV check (1.89.0)
+        description: Verify compilation with minimum supported Rust version
+        entry: cargo +1.89.0 check --all-targets --all-features
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: cargo-deny
+        name: cargo deny
+        description: Check licenses, advisories, and dependency bans
+        entry: cargo deny check
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]

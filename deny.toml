@@ -133,10 +133,11 @@ allow = [
 ]
 
 # Explicitly ban OpenSSL-related crates (prefer rustls)
+# Note: openssl-probe is allowed — it only locates system CA cert paths,
+# does not link to openssl, and is required by rustls-native-certs in reqwest 0.13
 deny = [
     { name = "openssl" },
     { name = "openssl-sys" },
-    { name = "openssl-probe" },
 ]
 
 # Certain crates/versions that will be skipped when doing duplicate detection.

@@ -82,7 +82,7 @@ jobs:
       - name: Install Rust toolchain at MSRV
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.85.1
+          toolchain: 1.89.0
       - name: Enable cache
         uses: Swatinem/rust-cache@v2
       - name: Check compilation with MSRV
