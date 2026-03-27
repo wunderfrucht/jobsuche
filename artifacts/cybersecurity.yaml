@@ -1,0 +1,358 @@
+artifacts:
+  # ──────────────────────────────────────────────────
+  # Assets (TARA — what needs protection)
+  # ──────────────────────────────────────────────────
+
+  - id: ASSET-001
+    type: asset
+    title: API Key
+    status: accepted
+    description: >
+      The authentication credential used to access the Bundesagentur fur Arbeit
+      Jobsuche REST API. Sent as the X-API-Key header on every request. Currently
+      a well-known static value ("jobboerse-jobsuche") but must still be treated
+      as a secret because a changed or revoked key would break all library users.
+    fields:
+      asset-type: data
+      cybersecurity-properties: [confidentiality]
+
+  - id: ASSET-002
+    type: asset
+    title: Job Listing Data
+    status: accepted
+    description: >
+      Job listing data returned by the API, which contains personally
+      identifiable information (PII) including employer names, physical
+      addresses, contact details, and internal reference numbers. This data
+      must be protected in transit and handled carefully to avoid unintended
+      disclosure through logging or error messages.
+    fields:
+      asset-type: data
+      cybersecurity-properties: [confidentiality, integrity]
+
+  - id: ASSET-003
+    type: asset
+    title: API Communication Channel
+    status: accepted
+    description: >
+      The HTTPS/TLS communication channel between the library and the
+      rest.arbeitsagentur.de API endpoint. All requests and responses traverse
+      this channel, carrying the API key, search parameters, and job listing
+      data. The channel must provide confidentiality, integrity, and
+      authenticity guarantees.
+    fields:
+      asset-type: interface
+      cybersecurity-properties: [confidentiality, integrity, authenticity]
+
+  - id: ASSET-004
+    type: asset
+    title: Reference Number Encoding
+    status: accepted
+    description: >
+      The base64-encoded job reference numbers used to retrieve individual job
+      details from the API. The encoding process must preserve integrity so
+      that the correct job is retrieved and injection of malicious payloads
+      into API paths is prevented.
+    fields:
+      asset-type: data
+      cybersecurity-properties: [integrity]
+
+  # ──────────────────────────────────────────────────
+  # Threat Scenarios (TARA — what can go wrong)
+  # ──────────────────────────────────────────────────
+
+  - id: TS-001
+    type: threat-scenario
+    title: API key extracted from binary or process memory
+    status: accepted
+    description: >
+      An attacker with local access extracts the API key from the compiled
+      binary (string analysis), process memory dump, or debug/log output.
+      Although the key is currently a well-known value, exposure through
+      debug output or logs sets a bad precedent and could leak future
+      credentials if the API switches to per-client keys.
+    fields:
+      attack-vector: local
+      attack-feasibility: medium
+      impact: moderate
+    links:
+      - type: threatens
+        target: ASSET-001
+
+  - id: TS-002
+    type: threat-scenario
+    title: Man-in-the-middle on API communication
+    status: accepted
+    description: >
+      An attacker intercepts network traffic between the library and
+      rest.arbeitsagentur.de to eavesdrop on job listing data, capture the
+      API key, or modify API responses. This is feasible if TLS is
+      downgraded, disabled, or improperly configured.
+    fields:
+      attack-vector: network
+      attack-feasibility: low
+      impact: severe
+    links:
+      - type: threatens
+        target: ASSET-003
+
+  - id: TS-003
+    type: threat-scenario
+    title: Malicious API response causes deserialization exploit
+    status: accepted
+    description: >
+      A compromised or spoofed API endpoint returns a crafted JSON response
+      designed to exploit deserialization vulnerabilities in serde_json or
+      the typed response structures. This could cause panics, memory
+      corruption, or unexpected behavior in the consuming application.
+    fields:
+      attack-vector: network
+      attack-feasibility: low
+      impact: severe
+    links:
+      - type: threatens
+        target: ASSET-002
+
+  - id: TS-004
+    type: threat-scenario
+    title: Denial of service via pagination abuse
+    status: accepted
+    description: >
+      An attacker or misconfigured caller uses the pagination iterator
+      without bounds, causing the library to make an excessive number of
+      API requests. This exhausts local resources (memory, network) and
+      may trigger rate limiting or IP bans from the API provider, resulting
+      in denial of service for all library users sharing the same origin.
+    fields:
+      attack-vector: network
+      attack-feasibility: medium
+      impact: moderate
+    links:
+      - type: threatens
+        target: ASSET-003
+
+  - id: TS-005
+    type: threat-scenario
+    title: Reference number injection via base64 encoding
+    status: accepted
+    description: >
+      An attacker supplies a crafted reference number string that, after
+      base64 encoding, produces a path traversal or injection payload in
+      the API URL. This could redirect requests to unintended API endpoints
+      or cause unexpected server-side behavior.
+    fields:
+      attack-vector: local
+      attack-feasibility: low
+      impact: moderate
+    links:
+      - type: threatens
+        target: ASSET-004
+
+  # ──────────────────────────────────────────────────
+  # Risk Assessments (TARA — how bad is it)
+  # ──────────────────────────────────────────────────
+
+  - id: RA-001
+    type: risk-assessment
+    title: API key exposure risk
+    status: accepted
+    description: >
+      Risk that the API key is exposed through debug output, log messages,
+      or binary analysis. Feasibility is medium (trivially extractable from
+      binary strings), but impact is moderate because the key is currently
+      a well-known static value. Mitigation warranted to prevent future
+      credential leakage if the API model changes.
+    fields:
+      risk-level: conditional
+      risk-treatment: mitigate
+    links:
+      - type: assesses
+        target: TS-001
+
+  - id: RA-002
+    type: risk-assessment
+    title: TLS downgrade risk
+    status: accepted
+    description: >
+      Risk that API communication is intercepted due to TLS misconfiguration
+      or downgrade. Feasibility is low because the library uses rustls with
+      no fallback to native-tls or plain HTTP. Impact would be severe if
+      exploited. Current configuration provides strong mitigation.
+    fields:
+      risk-level: acceptable
+      risk-treatment: mitigate
+    links:
+      - type: assesses
+        target: TS-002
+
+  - id: RA-003
+    type: risk-assessment
+    title: Deserialization attack risk
+    status: accepted
+    description: >
+      Risk that a malicious API response exploits deserialization. Feasibility
+      is low because serde_json is memory-safe and the typed structs reject
+      unexpected shapes. Impact could be severe in theory but Rust's type
+      system and serde's design make exploitation impractical. Risk accepted.
+    fields:
+      risk-level: acceptable
+      risk-treatment: accept
+    links:
+      - type: assesses
+        target: TS-003
+
+  - id: RA-004
+    type: risk-assessment
+    title: Denial of service via pagination risk
+    status: accepted
+    description: >
+      Risk that unbounded pagination exhausts resources or triggers API
+      bans. Feasibility is medium because any caller can invoke the iterator.
+      Impact is moderate, limited to service disruption. The hard limit of
+      100 pages provides mitigation but must be enforced consistently.
+    fields:
+      risk-level: conditional
+      risk-treatment: mitigate
+    links:
+      - type: assesses
+        target: TS-004
+
+  # ──────────────────────────────────────────────────
+  # Cybersecurity Goals (SEC.1 — what we aim for)
+  # ──────────────────────────────────────────────────
+
+  - id: CSG-001
+    type: cybersecurity-goal
+    title: API key must not be logged or included in error messages
+    status: accepted
+    description: >
+      The API key value must never appear in Debug or Display trait output,
+      log messages, or error context strings. This prevents accidental
+      credential leakage through application logs or debug dumps.
+    fields:
+      verification-criteria: >
+        No Debug or Display implementation on any library type emits
+        the API key value. Error messages reference the key's existence
+        but not its value.
+    links:
+      - type: mitigates
+        target: TS-001
+
+  - id: CSG-002
+    type: cybersecurity-goal
+    title: All API communication must use TLS 1.2 or higher
+    status: accepted
+    description: >
+      Every HTTP connection to rest.arbeitsagentur.de must use TLS 1.2 or
+      TLS 1.3. The library must not permit fallback to plain HTTP or to
+      legacy TLS versions. This is enforced by using rustls as the sole
+      TLS backend.
+    fields:
+      verification-criteria: >
+        reqwest is compiled with rustls-tls feature only. No
+        native-tls or default-tls feature is enabled. All base URLs
+        use the https:// scheme.
+    links:
+      - type: mitigates
+        target: TS-002
+
+  - id: CSG-003
+    type: cybersecurity-goal
+    title: Pagination must be bounded to prevent resource exhaustion
+    status: accepted
+    description: >
+      The pagination iterator and stream must enforce a hard upper limit
+      on the number of pages fetched, preventing unbounded resource
+      consumption. The current limit is 100 pages, matching the API's
+      own constraint.
+    fields:
+      verification-criteria: >
+        Both JobIterator (sync) and the async stream stop after at most
+        100 pages regardless of caller configuration.
+    links:
+      - type: mitigates
+        target: TS-004
+
+  # ──────────────────────────────────────────────────
+  # Cybersecurity Requirements (SEC.1 — how we do it)
+  # ──────────────────────────────────────────────────
+
+  - id: CSREQ-001
+    type: cybersecurity-req
+    title: Exclude API key values from Debug and Display output
+    status: accepted
+    description: >
+      The library must not include API key values in any Debug or Display
+      trait implementation. Types that hold the API key (e.g., ClientConfig,
+      internal request builders) must either omit the key field from debug
+      output or redact it.
+    fields:
+      req-type: authorization
+      priority: must
+      verification-criteria: >
+        Inspect all Debug/Display derive macros and manual implementations
+        on types containing API key fields. Confirm the key value is
+        never emitted.
+    links:
+      - type: derives-from
+        target: CSG-001
+
+  - id: CSREQ-002
+    type: cybersecurity-req
+    title: Use rustls-tls exclusively with no fallback to plain HTTP
+    status: accepted
+    description: >
+      The reqwest dependency must be configured with the rustls-tls feature
+      only. The native-tls and default-tls features must not be enabled.
+      All API base URLs must use the https:// scheme with no option to
+      override to http://.
+    fields:
+      req-type: encryption
+      priority: must
+      verification-criteria: >
+        Cargo.toml specifies reqwest with rustls-tls feature. No
+        native-tls feature appears in the dependency tree. The base
+        URL constant uses https://.
+    links:
+      - type: derives-from
+        target: CSG-002
+
+  - id: CSREQ-003
+    type: cybersecurity-req
+    title: Enforce hard page limit of 100 on pagination
+    status: accepted
+    description: >
+      Both the synchronous JobIterator and the asynchronous pagination
+      stream must enforce a hard limit of 100 pages maximum. The iterator
+      must stop yielding results after 100 pages have been fetched,
+      regardless of whether more results may be available.
+    fields:
+      req-type: availability
+      priority: must
+      verification-criteria: >
+        Unit tests confirm that pagination stops at exactly 100 pages.
+        Code review confirms the limit is a constant, not configurable
+        by callers to exceed 100.
+    links:
+      - type: derives-from
+        target: CSG-003
+
+  - id: CSREQ-004
+    type: cybersecurity-req
+    title: Validate reference numbers before base64 encoding
+    status: accepted
+    description: >
+      Input reference numbers must be validated before base64 encoding and
+      inclusion in API request URLs. Validation must reject empty strings
+      and strings containing path separator characters or other characters
+      that could result in path traversal after encoding.
+    fields:
+      req-type: integrity
+      priority: must
+      verification-criteria: >
+        The job_details method validates the reference number input.
+        Empty and malicious reference numbers are rejected with an
+        appropriate error variant.
+    links:
+      - type: derives-from
+        target: CSG-001

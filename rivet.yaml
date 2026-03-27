@@ -4,6 +4,8 @@ project:
   schemas:
     - common
     - dev
+    - stpa
+    - cybersecurity
 
 sources:
   - path: artifacts
