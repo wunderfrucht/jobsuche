@@ -37,7 +37,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Display results
     for (i, job) in results.stellenangebote.iter().enumerate() {
         println!("{}. {}", i + 1, job.beruf.as_deref().unwrap_or("Unknown"));
-        println!("   Company: {}", job.arbeitgeber);
+        println!(
+            "   Company: {}",
+            job.arbeitgeber.as_deref().unwrap_or("Unknown")
+        );
         println!(
             "   Location: {}, {}",
             job.arbeitsort.ort.as_deref().unwrap_or("unknown"),

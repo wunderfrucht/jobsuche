@@ -34,8 +34,9 @@ pub struct JobListing {
     /// Job listing title
     #[serde(default)]
     pub titel: Option<String>,
-    /// Employer name
-    pub arbeitgeber: String,
+    /// Employer name (may be missing for some listings)
+    #[serde(default)]
+    pub arbeitgeber: Option<String>,
     /// Publication date (ISO 8601 format: YYYY-MM-DD)
     #[serde(default)]
     pub aktuelle_veroeffentlichungsdatum: Option<String>,
@@ -370,7 +371,7 @@ mod tests {
         let listing: JobListing = serde_json::from_str(json).unwrap();
         assert_eq!(listing.refnr, "10001-1234567-S");
         assert_eq!(listing.beruf, Some("Rust Developer".to_string()));
-        assert_eq!(listing.arbeitgeber, "Awesome Company");
+        assert_eq!(listing.arbeitgeber, Some("Awesome Company".to_string()));
         assert_eq!(
             listing.aktuelle_veroeffentlichungsdatum,
             Some("2025-10-21".to_string())
@@ -539,7 +540,7 @@ mod tests {
             refnr: "10001-TEST-S".to_string(),
             beruf: Some("Developer".to_string()),
             titel: Some("Senior Developer".to_string()),
-            arbeitgeber: "Company".to_string(),
+            arbeitgeber: Some("Company".to_string()),
             aktuelle_veroeffentlichungsdatum: Some("2025-10-21".to_string()),
             eintrittsdatum: None,
             arbeitsort: WorkLocation {

@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "{}. {} at {} ({})",
                     count,
                     job.beruf.as_deref().unwrap_or("Unknown"),
-                    job.arbeitgeber,
+                    job.arbeitgeber.as_deref().unwrap_or("Unknown"),
                     job.arbeitsort.ort.as_deref().unwrap_or("unknown")
                 );
             }
@@ -97,7 +97,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "{}. {} at {}",
                 count,
                 job.beruf.as_deref().unwrap_or("Unknown"),
-                job.arbeitgeber
+                job.arbeitgeber.as_deref().unwrap_or("Unknown")
             );
         }
     }

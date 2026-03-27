@@ -46,7 +46,7 @@ fn test_real_api_search() {
         println!(
             "First job: {} at {}",
             first_job.beruf.as_deref().unwrap_or("Unknown"),
-            first_job.arbeitgeber
+            first_job.arbeitgeber.as_deref().unwrap_or("Unknown")
         );
         assert!(!first_job.refnr.is_empty(), "Job should have refnr");
         assert!(
@@ -54,7 +54,10 @@ fn test_real_api_search() {
             "Job should have beruf"
         );
         assert!(
-            !first_job.arbeitgeber.is_empty(),
+            first_job
+                .arbeitgeber
+                .as_ref()
+                .is_some_and(|a| !a.is_empty()),
             "Job should have arbeitgeber"
         );
     }

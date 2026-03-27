@@ -27,7 +27,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  refnr: {}", job.refnr);
         println!("  beruf: {}", job.beruf.as_deref().unwrap_or("Unknown"));
         println!("  titel: {:?}", job.titel);
-        println!("  arbeitgeber: {}", job.arbeitgeber);
+        println!(
+            "  arbeitgeber: {}",
+            job.arbeitgeber.as_deref().unwrap_or("Unknown")
+        );
         println!(
             "  aktuelle_veroeffentlichungsdatum: {:?}",
             job.aktuelle_veroeffentlichungsdatum

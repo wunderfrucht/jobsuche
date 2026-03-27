@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(
             "• {} - {}",
             job.beruf.as_deref().unwrap_or("Unknown"),
-            job.arbeitgeber
+            job.arbeitgeber.as_deref().unwrap_or("Unknown")
         );
         println!(
             "  📍 {}, {} ({}km away)",
