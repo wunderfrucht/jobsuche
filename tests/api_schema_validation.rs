@@ -148,6 +148,14 @@ fn delay() {
 // ---------------------------------------------------------------------------
 
 /// Recursively walk a JSON value and build a map of field_path -> JSON type name.
+/// Prefixes whose children are dynamic data (not schema fields).
+/// We record the parent's type but do not recurse into its keys.
+const DYNAMIC_PREFIXES: &[&str] = &["facetten"];
+
+fn is_dynamic_path(path: &str) -> bool {
+    DYNAMIC_PREFIXES.iter().any(|p| path.starts_with(p))
+}
+
 fn extract_schema(value: &Value, prefix: &str, schema: &mut BTreeMap<String, String>) {
     match value {
         Value::Object(map) => {
@@ -159,6 +167,11 @@ fn extract_schema(value: &Value, prefix: &str, schema: &mut BTreeMap<String, Str
                 };
                 let type_name = json_type_name(val);
                 schema.insert(path.clone(), type_name);
+                // Skip recursion into dynamic-data subtrees (e.g. facetten
+                // contains employer names and job titles that change daily)
+                if is_dynamic_path(&path) {
+                    continue;
+                }
                 // Recurse into objects
                 if val.is_object() {
                     extract_schema(val, &path, schema);
