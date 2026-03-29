@@ -928,16 +928,20 @@ fn test_pagination_fewer_than_page_size_stops() {
 
 /// Test that an empty page (0 results) returns false from fetch_next_page.
 /// The iterator should yield no results when the first page is empty.
+/// Uses expect(1) to ensure only ONE request is made — if the mutant
+/// changes `> 0` to `>= 0`, fetch_next_page returns Ok(true) and the
+/// iterator tries to fetch page 2, which violates the expect(1).
 #[test]
 fn test_pagination_empty_page_returns_no_results() {
     let mut server = Server::new();
 
-    // Page 1: 0 results
+    // Page 1: 0 results — expect exactly 1 request
     let _m1 = server
         .mock(
             "GET",
             mockito::Matcher::Regex(r"^/pc/v4/jobs\?.*page=1.*".to_string()),
         )
+        .expect(1)
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(

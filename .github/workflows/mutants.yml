@@ -24,7 +24,7 @@ jobs:
       - name: Install cargo-mutants
         run: cargo install cargo-mutants
       - name: Run mutation testing
-        run: cargo mutants --all-features --timeout 60
+        run: cargo mutants --all-features --timeout 30
       - name: Upload mutation results
         if: always()
         uses: actions/upload-artifact@v6
