@@ -515,6 +515,20 @@ mod tests {
         assert_eq!(options.serialize(), None);
     }
 
+    /// Verify that `SearchOptions::builder()` returns a functional builder
+    /// that can chain methods and produce a valid `SearchOptions`.
+    /// This kills the mutation that replaces `builder()` with `Default::default()`.
+    #[test]
+    fn test_builder_returns_functional_builder() {
+        let mut builder = SearchOptions::builder();
+        builder.was("test");
+        let options = builder.build();
+        // The key assertion: the builder created via builder() must support
+        // method chaining that produces serializable output.
+        let query = options.serialize().expect("should serialize with params");
+        assert!(query.contains("was=test"));
+    }
+
     #[test]
     fn test_combined_filters() {
         let options = SearchOptions::builder()

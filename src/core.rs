@@ -163,6 +163,7 @@ pub fn decode_refnr(encoded: &str) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tracing_test::traced_test;
 
     #[test]
     fn test_encode_refnr() {
@@ -226,5 +227,69 @@ mod tests {
     fn test_encode_refnr_non_standard_chars() {
         let encoded = encode_refnr("10001/1001601666@S");
         assert!(!encoded.is_empty());
+    }
+
+    // --- Mutation-killing tests ---
+
+    #[test]
+    fn test_api_key_returns_default_value() {
+        let core = ClientCore::new("https://example.com", Credentials::default()).unwrap();
+        assert_eq!(core.api_key(), "jobboerse-jobsuche");
+    }
+
+    #[test]
+    fn test_api_key_returns_custom_value() {
+        let core = ClientCore::new(
+            "https://example.com",
+            Credentials::ApiKey("custom-key".to_string()),
+        )
+        .unwrap();
+        assert_eq!(core.api_key(), "custom-key");
+    }
+
+    #[traced_test]
+    #[test]
+    fn test_encode_refnr_no_warn_on_length_exactly_50() {
+        let exact = "a".repeat(50);
+        encode_refnr(&exact);
+        assert!(!logs_contain("unusually long input"));
+    }
+
+    #[traced_test]
+    #[test]
+    fn test_encode_refnr_warns_on_length_51() {
+        let long = "a".repeat(51);
+        encode_refnr(&long);
+        assert!(logs_contain("unusually long input"));
+    }
+
+    #[traced_test]
+    #[test]
+    fn test_encode_refnr_no_warn_on_valid_refnr() {
+        encode_refnr("10001-TEST-S");
+        assert!(!logs_contain("non-standard characters"));
+        assert!(!logs_contain("unusually long"));
+        assert!(!logs_contain("empty"));
+    }
+
+    #[traced_test]
+    #[test]
+    fn test_encode_refnr_hyphen_only_is_valid() {
+        encode_refnr("---");
+        assert!(!logs_contain("non-standard"));
+    }
+
+    #[traced_test]
+    #[test]
+    fn test_encode_refnr_warns_on_non_standard_chars_traced() {
+        encode_refnr("hello@world");
+        assert!(logs_contain("non-standard characters"));
+    }
+
+    #[traced_test]
+    #[test]
+    fn test_encode_refnr_warns_on_empty_traced() {
+        encode_refnr("");
+        assert!(logs_contain("empty string"));
     }
 }
