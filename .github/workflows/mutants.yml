@@ -27,7 +27,7 @@ jobs:
         run: cargo mutants --all-features --timeout 30
       - name: Upload mutation results
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mutation-testing-results
           path: mutants.out/
