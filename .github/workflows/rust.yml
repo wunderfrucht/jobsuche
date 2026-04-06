@@ -126,7 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Check semver
-        uses: obi1kenobi/cargo-semver-checks-action@v2.8
+        uses: obi1kenobi/cargo-semver-checks-action@v2.9
     # Until it is running, keep it as is
     continue-on-error: true
 
